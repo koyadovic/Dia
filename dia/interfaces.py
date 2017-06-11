@@ -3,7 +3,8 @@ from abc import ABCMeta, abstractmethod
 from dia.models import GlucoseLevel, Activity, Trait, InsulinAdministration, Feeding
 
 
-class AbstractDescriptiveRepository(ABCMeta):
+class AbstractDescriptiveRepository:
+    __metaclass__ = ABCMeta
 
     """
     pk hace referencia aqui a aquello que pueda servir para identificar
@@ -217,7 +218,8 @@ All the DescriptiveRepositoryObserver observers must implement this interface
 and use the methods add_descriptive_observer of the adapter to declare itself as
 descriptive_observer for the events
 """
-class AbstractDescriptiveRepositoryObserver(ABCMeta):
+class AbstractDescriptiveRepositoryObserver:
+    __metaclass_ = ABCMeta
 
     @abstractmethod
     def on_glucose_added(self, glucose):
@@ -240,7 +242,7 @@ class AbstractDescriptiveRepositoryObserver(ABCMeta):
         raise NotImplementedError
 
 
-class DescriptiveRepositoryAdapter():
+class DescriptiveRepositoryAdapter(object):
     _r = None
     
     def __init__(self, repository):
