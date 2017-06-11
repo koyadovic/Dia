@@ -17,6 +17,17 @@ class Trait(DescriptiveModel):
         self.utc_timestamp = utc_timestamp
         self.kind = kind
         self.value = value
+    def __iter__(self):
+        """
+        With this, only with a dict(obj) the object is automatically
+        converted as a dict. Easy then to convert to json.
+        And from a dict, we can instantiate models as Model(**dict)
+        """
+        yield 'pk', self.pk
+        yield 'user_pk', self.user_pk
+        yield 'utc_timestamp', self.utc_timestamp
+        yield 'kind', self.kind
+        yield 'value', self.value
     
 
 class GlucoseLevel(DescriptiveModel):
@@ -29,6 +40,12 @@ class GlucoseLevel(DescriptiveModel):
         self.user_pk = user_pk
         self.utc_timestamp = utc_timestamp
         self.mgdl_level = mgdl_level
+    def __iter__(self):
+        " With this, only with a dict(obj) the object is automatically converted as a dict. "
+        yield 'pk', self.pk
+        yield 'user_pk', self.user_pk
+        yield 'utc_timestamp', self.utc_timestamp
+        yield 'mgdl_level', self.mgdl_level
 
 
 class Activity(DescriptiveModel):
@@ -43,6 +60,13 @@ class Activity(DescriptiveModel):
         self.utc_timestamp = utc_timestamp
         self.intensity = intensity
         self.minutes = minutes
+    def __iter__(self):
+        " With this, only with a dict(obj) the object is automatically converted as a dict. "
+        yield 'pk', self.pk
+        yield 'user_pk', self.user_pk
+        yield 'utc_timestamp', self.utc_timestamp
+        yield 'intensity', self.intensity
+        yield 'minutes', self.minutes
 
 
 class InsulinAdministration(DescriptiveModel):
@@ -57,6 +81,13 @@ class InsulinAdministration(DescriptiveModel):
         self.utc_timestamp = utc_timestamp
         self.insulin_type = insulin_type
         self.insulin_units = insulin_units
+    def __iter__(self):
+        " With this, only with a dict(obj) the object is automatically converted as a dict. "
+        yield 'pk', self.pk
+        yield 'user_pk', self.user_pk
+        yield 'utc_timestamp', self.utc_timestamp
+        yield 'insulin_type', self.insulin_type
+        yield 'insulin_units', self.insulin_units
 
 
 class Feeding(DescriptiveModel):
@@ -81,6 +112,18 @@ class Feeding(DescriptiveModel):
         self.fat_gr = fat_gr
         self.fiber_gr = fiber_gr
         self.alcohol_gr = alcohol_gr
+    def __iter__(self):
+        " With this, only with a dict(obj) the object is automatically converted as a dict. "
+        yield 'pk', self.pk
+        yield 'user_pk', self.user_pk
+        yield 'utc_timestamp', self.utc_timestamp
+        yield 'total_gr', self.total_gr
+        yield 'total_ml', self.total_ml
+        yield 'carb_gr', self.carb_gr
+        yield 'protein_gr', self.protein_gr
+        yield 'fat_gr', self.fat_gr
+        yield 'fiber_gr', self.fiber_gr
+        yield 'alcohol_gr', self.alcohol_gr
 
 
 
