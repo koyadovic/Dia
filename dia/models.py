@@ -28,6 +28,8 @@ class Trait(DescriptiveModel):
         yield 'utc_timestamp', self.utc_timestamp
         yield 'kind', self.kind
         yield 'value', self.value
+    def __str__(self):
+        return '{}: {}'.format(type(self).__name__, dict(self))
     
 
 class GlucoseLevel(DescriptiveModel):
@@ -46,6 +48,8 @@ class GlucoseLevel(DescriptiveModel):
         yield 'user_pk', self.user_pk
         yield 'utc_timestamp', self.utc_timestamp
         yield 'mgdl_level', self.mgdl_level
+    def __str__(self):
+        return '{}: {}'.format(type(self).__name__, dict(self))
 
 
 class Activity(DescriptiveModel):
@@ -67,6 +71,8 @@ class Activity(DescriptiveModel):
         yield 'utc_timestamp', self.utc_timestamp
         yield 'intensity', self.intensity
         yield 'minutes', self.minutes
+    def __str__(self):
+        return '{}: {}'.format(type(self).__name__, dict(self))
 
 
 class InsulinAdministration(DescriptiveModel):
@@ -88,6 +94,8 @@ class InsulinAdministration(DescriptiveModel):
         yield 'utc_timestamp', self.utc_timestamp
         yield 'insulin_type', self.insulin_type
         yield 'insulin_units', self.insulin_units
+    def __str__(self):
+        return '{}: {}'.format(type(self).__name__, dict(self))
 
 
 class Feeding(DescriptiveModel):
@@ -124,6 +132,8 @@ class Feeding(DescriptiveModel):
         yield 'fat_gr', self.fat_gr
         yield 'fiber_gr', self.fiber_gr
         yield 'alcohol_gr', self.alcohol_gr
+    def __str__(self):
+        return '{}: {}'.format(type(self).__name__, dict(self))
 
 
 
