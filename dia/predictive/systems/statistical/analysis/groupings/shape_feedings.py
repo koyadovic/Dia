@@ -5,11 +5,12 @@ mejor usar Spyder y el fichero digestion_shapes
 
 Actualizados aquí a fecha 30/01/2017 21:10
 """
+from ...analysis.tools.graphs import Graph
+from ...tools.dates import Datetime
+from ...tools.shapes import Shape
 
-from modules.descriptive.models import Feeding
-from modules.tools.dates import Datetime
-from modules.tools.shapes import Shape
-from modules.analysis.tools.graphs import Graph
+from dia.models import Feeding
+
 
 """
 Para dibujar gráficas

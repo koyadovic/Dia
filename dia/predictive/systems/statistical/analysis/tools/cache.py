@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-
-from modules.analysis.tools.context import Context
+from ..basics.context import Context
 
 
 class CalculationCache(object):

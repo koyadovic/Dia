@@ -8,6 +8,7 @@ base_dir_list = os.path.abspath(__file__).split('/')[:-1]
 base_dir = '/'.join(base_dir_list)
 from sqlalchemy.pool import QueuePool
 from sqlalchemy import create_engine
+
 engine = create_engine(
     'sqlite:///' + base_dir + '/analysis.db',
     echo=False,

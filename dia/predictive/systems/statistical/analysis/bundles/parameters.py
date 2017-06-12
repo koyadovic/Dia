@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from modules.analysis.parameters.carb_dose import CarbsDoses
-from modules.analysis.parameters.glucose_dose import GlucoseGramsDose
+from ...analysis.parameters.glucose_dose import GlucoseGramsDose
+from ...analysis.parameters.carb_dose import CarbsDoses
 
 
 

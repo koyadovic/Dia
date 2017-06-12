@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+from ...analysis.tools.property import propertycached
+from ...tools.dates import Datetime, Timedelta
 
-from modules.descriptive.models import Trait, Activity
-from modules.analysis.tools.property import propertycached
-from modules.tools.dates import Datetime, Timedelta
+from dia.models import TraitKind, TraitKindSexValue
+
 
 
 class BodyTraits(object):
@@ -66,31 +67,36 @@ blood_liters ............... {} L
         
     @propertycached
     def sex(self):
-        return Trait.get_trait(self.user_id, Trait.TRAIT_SEX)
+        return Trait.get_trait(self.user_id, TraitKind.SEX)
     
     @propertycached
     def height(self):
-        return BodyTraits._float(Trait.get_trait(self.user_id, Trait.TRAIT_HEIGHT_CM))
+        return BodyTraits._float(Trait.get_trait(self.user_id, TraitKind.HEIGHT_CM))
     
     @propertycached
     def weight(self):
-        return BodyTraits._float(Trait.get_trait(self.user_id, Trait.TRAIT_WEIGHT_KG))
+        return BodyTraits._float(Trait.get_trait(self.user_id, TraitKind.WEIGHT_KG))
 
     @propertycached
     def neck(self):
-        return BodyTraits._float(Trait.get_trait(self.user_id, Trait.TRAIT_NECK_PERIMETER_CM))
+        return BodyTraits._float(Trait.get_trait(self.user_id, TraitKind.NECK_PERIMETER_CM))
 
     @propertycached
     def abdomen(self):
-        return BodyTraits._float(Trait.get_trait(self.user_id, Trait.TRAIT_ABDOMEN_PERIMETER_CM))
+        return BodyTraits._float(Trait.get_trait(self.user_id, TraitKind.ABDOMEN_PERIMETER_CM))
 
     @propertycached
     def waist(self):
-        return BodyTraits._float(Trait.get_trait(self.user_id, Trait.TRAIT_WAIST_PERIMETER_CM))
+        return BodyTraits._float(Trait.get_trait(self.user_id, TraitKind.WAIST_PERIMETER_CM))
 
     @propertycached
     def age(self):
-        birth_from_epoc = BodyTraits._int(Trait.get_trait(self.user_id, Trait.TRAIT_BIRTH_SECONDS_FROM_EPOCH))
+        """
+        TODO
+        
+        Hay que cambiar el birth from epoc a birth utc timestamp
+        """
+        birth_from_epoc = BodyTraits._int(Trait.get_trait(self.user_id, TraitKind.BIRTH_UTC_TIMESTAMP))
         timedelta = self.current_datetime - Datetime.utcfromtimestamp(birth_from_epoc)
         return timedelta.total_years
     
@@ -124,13 +130,13 @@ blood_liters ............... {} L
     @property
     def kcal_needs(self):
         params = {}
-        params[Trait.TRAIT_SEX_MALE] = {
+        params[TraitKindSexValue.MALE] = {
             'sum_number': 66.,
             'weight': 13.7,
             'height': 5.,
             'age': 6.8
         }
-        params[Trait.TRAIT_SEX_FEMALE] = {
+        params[TraitKindSexValue.FEMALE] = {
             'sum_number': 655.,
             'weight': 9.6,
             'height': 1.8,
@@ -150,14 +156,14 @@ blood_liters ............... {} L
     @property
     def fat_percentage(self):
         params = {}
-        params[Trait.TRAIT_SEX_MALE] = {
+        params[TraitKindSexValue.MALE] = {
             'abdomen': 0.69,
             'height': -0.157,
             'neck': -0.7429,
             'waist': 0.0,
             'independent': 14.2
         }
-        params[Trait.TRAIT_SEX_FEMALE] = {
+        params[TraitKindSexValue.FEMALE] = {
             'abdomen': 0.47,
             'height': -0.25,
             'neck': -0.51,

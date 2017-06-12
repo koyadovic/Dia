@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-from modules.descriptive.models import InsulinAdministration
-from modules.analysis.tools.property import propertycached
-from modules.tools.dates import Timedelta
+from ...analysis.tools.property import propertycached
+from ...tools.dates import Timedelta
+
+from dia.models import InsulinType
+
 
 class CorrectionFactorRules(object):
 
@@ -51,11 +53,11 @@ class CorrectionFactorRules(object):
             return self._range_hours_count
 
         end_hours = {
-            InsulinAdministration.TYPE_RAPID: 3,
-            InsulinAdministration.TYPE_SHORT: 5,
-            InsulinAdministration.TYPE_INTERMEDIATE: 10,
-            InsulinAdministration.TYPE_SLOW: 20,
-            InsulinAdministration.TYPE_ULTRA_SLOW: 45,
+            InsulinType.RAPID: 3,
+            InsulinType.SHORT: 5,
+            InsulinType.INTERMEDIATE: 10,
+            InsulinType.SLOW: 20,
+            InsulinType.ULTRA_SLOW: 45,
             
         }
         start_dt = None

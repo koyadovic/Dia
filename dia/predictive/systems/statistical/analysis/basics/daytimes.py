@@ -3,9 +3,9 @@
 Calculará horas medias de comidas y aperitivos por usuario
 Calculará carbohidratos medios de ingesta por usuario
 """
-from modules.descriptive.models import InsulinAdministration
-from modules.analysis.tools.property import propertycached
-from modules.tools.dates import Time, Datetime, Timedelta
+from dia.predictive.systems.statistical.analysis.tools.property import propertycached
+from dia.predictive.systems.statistical.tools.dates import Time, Timedelta,\
+    Datetime
 
 
 """

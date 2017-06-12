@@ -1,4 +1,5 @@
 from dia.predictive.interfaces import AbstractPredictiveSystem
+from dia.interfaces import AbstractDescriptiveRepositoryObserver
 
 
 class StatisticalPredictiveSystem(AbstractDescriptiveRepositoryObserver, AbstractPredictiveSystem):

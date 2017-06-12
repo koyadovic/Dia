@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from modules.analysis.parameters.carb_dose import CarbsDoses
-from modules.analysis.basics.bodytraits import BodyTraits
-from modules.analysis.tools.context import Context
-from modules.tools.dates import Datetime
-from modules.analysis.basics.cfrules import CorrectionFactorRules
+from carb_dose import CarbsDoses
+from ..basics.bodytraits import BodyTraits
+from ..basics.context import Context
+from ...tools.dates import Datetime
+from ..basics.cfrules import CorrectionFactorRules
 
 
 class GlucoseGramsDose(object):

@@ -1,20 +1,17 @@
 # -*- coding: utf-8 -*-
-from modules.descriptive.events import on_glucose_inserted
-from modules.descriptive.models import InsulinAdministration
-from modules.descriptive.models import GlucoseLevel, Feeding, Activity
 
-from modules.tools.dates import Timedelta, Datetime
-from modules.tools.shapes import Shape
+from ...tools.dates import Timedelta, Datetime
+from ...tools.shapes import Shape
 
-from modules.analysis.groupings.shape_feedings import ShapeFeeding
-from modules.analysis.groupings.shape_insulins import ShapeInsulin
+from ...analysis.groupings.shape_feedings import ShapeFeeding
+from ...analysis.groupings.shape_insulins import ShapeInsulin
 
-from modules.analysis.bundles.basics import BasicGathering
-from modules.analysis.basics.daytimes import DayTimes
+from ...analysis.bundles.basics import BasicGathering
+from ...analysis.basics.daytimes import DayTimes
 
-from modules.analysis.tools.context import Context
-from modules.analysis.tools.stats import QuadraticInterpolation
-from modules.analysis.tools.graphs import Graph
+from ..basics.context import Context
+from ...analysis.tools.stats import QuadraticInterpolation
+from ...analysis.tools.graphs import Graph
 
 import matplotlib.patches as mpatches
 import matplotlib.ticker as mticker
@@ -23,14 +20,15 @@ import numpy as np
 
 
 from sqlalchemy.ext.hybrid import hybrid_property
+from dia.models import ActivityIntensity
 
 # MODELOS
 ################################################################################
 """
 Modelos especificos de la herramienta
 """
-from modules.analysis.model import engine as predictive_engine
-from modules.analysis.model import analysis_session
+from ...analysis.model import engine as predictive_engine
+from ...analysis.model import analysis_session
 from sqlalchemy import Column, Integer, Float, DateTime
 from sqlalchemy import and_, or_
 from sqlalchemy.ext.declarative import declarative_base
@@ -653,10 +651,10 @@ def _try_to_group_meal(glucose_level):
     minutos por cada actividad
     """
     intensity_minutes = {
-        Activity.INTENSITY_SOFT: 0,
-        Activity.INTENSITY_MEDIUM: 0,
-        Activity.INTENSITY_HIGH: 0,
-        Activity.INTENSITY_EXTREME: 0,
+        ActivityIntensity.SOFT: 0,
+        ActivityIntensity.MEDIUM: 0,
+        ActivityIntensity.HIGH: 0,
+        ActivityIntensity.EXTREME: 0,
     }
     activities = Activity.activities(
         user_id=context.user_id,
@@ -759,10 +757,10 @@ def _try_to_group_meal(glucose_level):
         basal_insulin=basal_insulin,
         glucose_level_before=glucose_level_before,
         glucose_level_after=level_at_120_minutes,
-        intensity_soft_minutes=intensity_minutes[Activity.INTENSITY_SOFT],
-        intensity_medium_minutes=intensity_minutes[Activity.INTENSITY_MEDIUM],
-        intensity_high_minutes=intensity_minutes[Activity.INTENSITY_HIGH],
-        intensity_extreme_minutes=intensity_minutes[Activity.INTENSITY_EXTREME],
+        intensity_soft_minutes=intensity_minutes[ActivityIntensity.SOFT],
+        intensity_medium_minutes=intensity_minutes[ActivityIntensity.MEDIUM],
+        intensity_high_minutes=intensity_minutes[ActivityIntensity.HIGH],
+        intensity_extreme_minutes=intensity_minutes[ActivityIntensity.EXTREME],
         
     )
     asess = analysis_session()
@@ -821,10 +819,10 @@ def _try_to_group_snack(glucose_level):
     minutos por cada actividad
     """
     intensity_minutes = {
-        Activity.INTENSITY_SOFT: 0,
-        Activity.INTENSITY_MEDIUM: 0,
-        Activity.INTENSITY_HIGH: 0,
-        Activity.INTENSITY_EXTREME: 0,
+        ActivityIntensity.SOFT: 0,
+        ActivityIntensity.MEDIUM: 0,
+        ActivityIntensity.HIGH: 0,
+        ActivityIntensity.EXTREME: 0,
     }
     activities = Activity.activities(
         user_id=context.user_id,
@@ -917,10 +915,10 @@ def _try_to_group_snack(glucose_level):
         alcohol_gr=nutrients_digested.digested_alcohol,
         prandial_insulin=prandial_insulin,
         basal_insulin=basal_insulin,
-        intensity_soft_minutes=intensity_minutes[Activity.INTENSITY_SOFT],
-        intensity_medium_minutes=intensity_minutes[Activity.INTENSITY_MEDIUM],
-        intensity_high_minutes=intensity_minutes[Activity.INTENSITY_HIGH],
-        intensity_extreme_minutes=intensity_minutes[Activity.INTENSITY_EXTREME],
+        intensity_soft_minutes=intensity_minutes[ActivityIntensity.SOFT],
+        intensity_medium_minutes=intensity_minutes[ActivityIntensity.MEDIUM],
+        intensity_high_minutes=intensity_minutes[ActivityIntensity.HIGH],
+        intensity_extreme_minutes=intensity_minutes[ActivityIntensity.EXTREME],
     )
     asess = analysis_session()
     asess.add(s)
@@ -930,7 +928,7 @@ def _try_to_group_snack(glucose_level):
 
 
 
-@on_glucose_inserted
+
 def _glucose_inserted(glucose):
     _try_to_group_meal(glucose)
     _try_to_group_snack(glucose)

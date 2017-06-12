@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from modules.descriptive.models import InsulinAdministration
-from modules.tools.shapes import Shape
+from ...tools.shapes import Shape
+
+from dia.models import InsulinAdministration, InsulinType
 
 
 class ShapeInsulin(Shape):
@@ -39,7 +40,7 @@ class ShapeInsulin(Shape):
     Revisados y actualizados aquí a fecha de 31/01/2017 8:58
     """
     SHAPE = {
-        InsulinAdministration.TYPE_RAPID: [
+        InsulinType.RAPID: [
             [    0,   0], [   10,  27], [   20,  55], [   30,  71],
             [   40,  86], [   50, 100], [   60,  91], [   70,  82],
             [   80,  73], [   90,  63], [  100,  54], [  110,  45],
@@ -48,7 +49,7 @@ class ShapeInsulin(Shape):
             [  200,   6], [  210,   5], [  220,   3], [  230,   2],
             [  240,   0],
         ],
-        InsulinAdministration.TYPE_SHORT: [
+        InsulinType.SHORT: [
             [    0,   0], [   10,  10], [   20,  20], [   30,  30],
             [   40,  42], [   50,  54], [   60,  67], [   70,  72],
             [   80,  78], [   90,  83], [  100,  89], [  110,  94],
@@ -63,7 +64,7 @@ class ShapeInsulin(Shape):
             [  440,  16], [  450,  13], [  460,  11], [  470,   9],
             [  480,   7], [  490,   4], [  500,   2], [  510,   0],
         ],
-        InsulinAdministration.TYPE_INTERMEDIATE: [
+        InsulinType.INTERMEDIATE: [
             [    0,   0], [   10,   5], [   20,   9], [   30,  14],
             [   40,  19], [   50,  23], [   60,  27], [   70,  31],
             [   80,  35], [   90,  39], [  100,  43], [  110,  47],
@@ -92,7 +93,7 @@ class ShapeInsulin(Shape):
             [ 1110,   6], [ 1130,   5], [ 1140,   4], [ 1150,   3],
             [ 1170,   2], [ 1180,   1], [ 1200,   0],
         ],
-        InsulinAdministration.TYPE_SLOW: [
+        InsulinType.SLOW: [
             [    0,   0], [   10,   7], [   20,  13], [   30,  20],
             [   40,  27], [   50,  33], [   60,  40], [   70,  47],
             [   80,  53], [   90,  60], [  100,  67], [  110,  73],
@@ -103,7 +104,7 @@ class ShapeInsulin(Shape):
             [  300, 100], [ 1390,  83], [ 1400,  67], [ 1410,  50],
             [ 1420,  33], [ 1430,  17], [ 1440,   0],
         ],
-        InsulinAdministration.TYPE_ULTRA_SLOW: [
+        InsulinType.SLOW: [
             [    0,   0], [   10,   7], [   20,  13], [   30,  20],
             [   40,  27], [   50,  33], [   60,  40], [   70,  47],
             [   80,  53], [   90,  60], [  100,  67], [  110,  73],

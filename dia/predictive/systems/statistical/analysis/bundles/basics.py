@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from modules.analysis.basics.bodytraits import BodyTraits
-from modules.analysis.basics.daytimes import DayTimes
-from modules.analysis.basics.cfrules import CorrectionFactorRules
-from modules.analysis.basics.basalinsulin import BasalInsulin
-from modules.analysis.basics.hba1c import HbA1c
+from ..basics.bodytraits import BodyTraits
+from ..basics.daytimes import DayTimes
+from ..basics.cfrules import CorrectionFactorRules
+from ..basics.basalinsulin import BasalInsulin
+from ..basics.hba1c import HbA1c
 
 
 class BasicGathering(object):

@@ -1,28 +1,27 @@
 # -*- coding: utf-8 -*-
 
-from modules.descriptive.models import GlucoseLevel
-from modules.descriptive.events import on_glucose_inserted
-from modules.tools.dates import Datetime, Timedelta
-
-from modules.analysis.tools.context import Context
-from modules.analysis.tools.property import propertycached
-from modules.analysis.basics.daytimes import DayTimes
-from modules.analysis.tools.graphs import Graph
 
 import matplotlib.patches as mpatches
 import matplotlib.ticker as mticker
 import numpy as np
 import math
 
+from ...analysis.tools.stats import PolynomialRegression, LinearRegression
 
 
 # MODELOS
 ################################################################################
-from modules.analysis.model import engine as predictive_engine
-from modules.analysis.model import analysis_session
+from ...analysis.model import engine as predictive_engine
+from ...analysis.model import analysis_session
+
+
 from sqlalchemy import Column, Integer, Float, Date
 from sqlalchemy.ext.declarative import declarative_base
-from modules.analysis.tools.stats import PolynomialRegression, LinearRegression
+from dia.predictive.systems.statistical.analysis.tools.graphs import Graph
+from dia.predictive.systems.statistical.analysis.tools.property import propertycached
+from dia.predictive.systems.statistical.analysis.basics.context import Context
+from dia.predictive.systems.statistical.analysis.basics.daytimes import DayTimes
+from dia.predictive.systems.statistical.tools.dates import Datetime, Timedelta
 
 
 Base = declarative_base(predictive_engine)
@@ -383,7 +382,6 @@ Estimated value in 90 days .... {}%""".format(
 
 
 
-@on_glucose_inserted
 def _recalculate_hba1c(glucose):
     context = Context(glucose.user_id, glucose.datetime)
 
