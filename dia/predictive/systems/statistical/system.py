@@ -1,7 +1,7 @@
 from dia.predictive.interfaces import AbstractPredictiveSystem
 
 
-class StatisticalPredictiveSystem(AbstractPredictiveSystem):
+class StatisticalPredictiveSystem(AbstractDescriptiveRepositoryObserver, AbstractPredictiveSystem):
 
     """
     To recalculate if necessary
