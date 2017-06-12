@@ -929,7 +929,7 @@ def _try_to_group_snack(glucose_level):
 
 
 
-def _glucose_inserted(glucose):
+def glucose_inserted(glucose):
     _try_to_group_meal(glucose)
     _try_to_group_snack(glucose)
 

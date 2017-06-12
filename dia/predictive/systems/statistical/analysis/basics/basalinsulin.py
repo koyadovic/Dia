@@ -532,7 +532,7 @@ Si sí existe, tendrá que haber dos días completos y no corresponderse el nuev
 el guardado, y guardarlo.
 """
 
-def _basal_checks(insulin):
+def basal_checks(insulin):
     context = Context(insulin.user_id, insulin.datetime)
     day_times = DayTimes(context)
     if day_times.is_ready():

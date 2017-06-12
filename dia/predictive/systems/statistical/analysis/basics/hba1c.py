@@ -382,7 +382,7 @@ Estimated value in 90 days .... {}%""".format(
 
 
 
-def _recalculate_hba1c(glucose):
+def recalculate_hba1c(glucose):
     context = Context(glucose.user_id, glucose.datetime)
 
     day_times = DayTimes(context)
