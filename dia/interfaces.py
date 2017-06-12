@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from abc import ABCMeta, abstractmethod
 
 from dia.models import GlucoseLevel, Activity, Trait, InsulinAdministration, Feeding

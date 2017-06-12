@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from dia.predictive.systems.statistical.system import StatisticalPredictiveSystem
 
 ALL_SYSTEMS = [
