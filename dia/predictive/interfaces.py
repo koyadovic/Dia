@@ -1,13 +1,11 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
 
-class RecommendationAdapter():
-    pass
-
 
 """
 All predictive modules must implement this interface.
 """
-class RecommendationAbstract(ABCMeta):
+class AbstractPredictiveSystem:
+    __metaclass__ = ABCMeta
     """
     With this method, there is only two possibilities that can occurs:
     1.- If there is an insulin administration event added:
@@ -29,6 +27,3 @@ class RecommendationAbstract(ABCMeta):
         raise NotImplementedError
 
 
-
-class AbstractPredictiveSystem(ABCMeta):
-    pass
