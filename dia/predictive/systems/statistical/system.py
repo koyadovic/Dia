@@ -46,6 +46,10 @@ class StatisticalPredictiveSystem(AbstractDescriptiveRepositoryObserver, Abstrac
     @property
     def unique_identificator(self):
         return "predictive.systems.statisticalpredictivesystem"
+    
+    @property
+    def name(self):
+        return "Statistical Predictive System v0.1"
 
 
 
