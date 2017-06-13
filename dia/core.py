@@ -37,6 +37,9 @@ class DiaCore(DescriptiveRepositoryAdapter):
         # list of predictive systems to use
         self._predictive_systems = []
 
+    @property    
+    def all_predictive_systems(self):
+        return self._predictive_systems
     
     def add_predictive_system(self, system):
         assert isinstance(system, AbstractPredictiveSystem),\

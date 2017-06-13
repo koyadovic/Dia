@@ -176,3 +176,28 @@ class InsulinType:
     __metaclass__ = ABCMeta
 
 
+
+
+"""
+This is for the recommendations
+
+Predictive systems must use this object.
+
+The recommendation is compound of InsulinAdministration, Feeding
+or Activity events that must be followed to maintain glucose levels
+in range.
+"""
+
+class Recommendation(DescriptiveModel):
+    def __init__(self):
+        self._events = []
+
+    def append_event(self, event):
+        assert isinstance(event, InsulinAdministration) or \
+            isinstance(event, Activity) or isinstance(event, Feeding)
+        self._events.append(event)
+    
+    @property
+    def events(self):
+        return self._events
+
