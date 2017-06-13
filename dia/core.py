@@ -34,7 +34,7 @@ class DiaCore(DescriptiveRepositoryAdapter):
     def __init__(self, descriptive_repository_class=None):
         super(DiaCore, self).__init__(repository=descriptive_repository_class())
 
-        # list of predictive systems to use
+        " list of predictive systems to use "
         self._predictive_systems = []
 
     @property    
@@ -52,20 +52,15 @@ class DiaCore(DescriptiveRepositoryAdapter):
         if system in self._predictive_systems:
             return
 
-        # lo aniadimos
+        " add the system "
         self._predictive_systems.append(system)
 
-        # lo aniadimos como observer
+        " add the system as observer of the descriptive events "
         self.add_descriptive_observer(system)
-
-        # de esta forma todos seran notificados por si necesitan realizar
-        # calculos. Despues, solo a uno se le podra consultar por recomendacion.
-
-        # El unique_identificator de cada sistema predictivo podria
-        # asociarse a cada usuario que utilice dia.
+        " With this, all will be notified for if they need to make recalculations "
 
 
-    # Se pedira recomendacion solo a un sistema predictivo.
+    " It will be request a recommendation only to one predictive system "
     def get_recommendation(self, user_pk=None, utc_timestamp=None, predictive_system_unique_identificator=None):
         assert len(self._predictive_systems) > 0, "There is no predictive systems added"
 
@@ -77,7 +72,7 @@ class DiaCore(DescriptiveRepositoryAdapter):
             if system.unique_identificator == ui:
                 return system.get_recommendation(user_pk, utc_timestamp)
         """
-        For the response returned see dia.interfaces.predictive
+        For the response returned see dia.models.Recommendation
         """
 
 

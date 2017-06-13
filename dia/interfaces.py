@@ -9,13 +9,9 @@ class AbstractDescriptiveRepository:
     __metaclass__ = ABCMeta
 
     """
-    pk hace referencia aqui a aquello que pueda servir para identificar
-    univocamente a cada elemento
+    pk references to something that could be used to identify to each element
     
-    user_pk exactamente igual. tendra que identificar univocamente a un
-    diabetico dentro del sistema.
-    
-    Pueden servir uuids, numeros, etc.
+    user_pk exactly equal. It will have to identify only one user inside the system
     """
 
     @abstractmethod
