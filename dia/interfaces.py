@@ -22,7 +22,7 @@ class AbstractDescriptiveRepository:
     def get_glucoses(self, user_pk, from_utc_timestamp=None,
         until_utc_timestamp=None, mgdl_level_above=None, mgdl_level_below=None,
         limit=None, order_by_utc_timestamp=True, order_ascending=True):
-        "Must be returned a List of GlucoseLevel instances"
+        "Must be returned a List of GlucoseLevel instances. [] if empty"
         raise NotImplementedError
 
     @abstractmethod
@@ -34,7 +34,7 @@ class AbstractDescriptiveRepository:
     def get_activities(self, user_pk, from_utc_timestamp=None,
         until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True,
         order_ascending=True):
-        "Must be returned a List of Activity instances"
+        "Must be returned a List of Activity instances. [] if empty"
         raise NotImplementedError
 
     @abstractmethod
@@ -47,7 +47,7 @@ class AbstractDescriptiveRepository:
     def get_insulin_administrations(self, user_pk, from_utc_timestamp=None,
         until_utc_timestamp=None, insulin_types_in=None, limit=None,
         order_by_utc_timestamp=True, order_ascending=True):
-        "Must be returned a List of InsulinAdministration instances"
+        "Must be returned a List of InsulinAdministration instances. [] if empty"
         raise NotImplementedError
 
 
@@ -61,7 +61,7 @@ class AbstractDescriptiveRepository:
     def get_feedings(self, user_pk, from_utc_timestamp=None,
         until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True,
         order_ascending=True):
-        "Must be returned a List of Feeding instances"
+        "Must be returned a List of Feeding instances. [] if empty"
         raise NotImplementedError
 
 
@@ -82,7 +82,7 @@ class AbstractDescriptiveRepository:
     def get_traits(self, user_pk, trait, from_utc_timestamp=None,
         until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True,
         order_ascending=True):
-        "Must be returned a List of Trait instances"
+        "Must be returned a List of Trait instances. [] if empty"
         raise NotImplementedError
 
 

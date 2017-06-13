@@ -165,40 +165,30 @@ day_times with injection ... {}
         """
         metodo preferido
         """
-        diacore.get_insulin_administrations(
+        insulins = diacore.get_insulin_administrations(
             user_pk=self._c.user_id,
-            from_utc_timestamp,
-            until_utc_timestamp,
-            limit,
-            order_by_utc_timestamp,
-            order_ascending
+            from_utc_timestamp=(self.last_basal_change + Timedelta(days=1)).utc_timestamp,
+            until_utc_timestamp=self._c.current_datetime.utc_timestamp,
+            limit=30,
+            order_by_utc_timestamp=True,
+            order_ascending=False
         )
         
-        
-        insulins = InsulinAdministration.basal_insulins(
-            user_id=self._c.user_id,
-            from_datetime=self.last_basal_change + Timedelta(days=1),
-            until_datetime=self._c.current_datetime,
-            order_by_datetime=True,
-            desc_order=True,
-            limit=30
-        )
-        
-        if insulins != None and len(insulins) > 0:
+        if len(insulins) > 0:
             return insulins
 
         """
         Metodo alternativo
         """
-        insulins = InsulinAdministration.basal_insulins(
-            user_id=self._c.user_id,
-            until_datetime=self._c.current_datetime,
-            order_by_datetime=True,
-            desc_order=True,
-            limit=30
+        insulins = diacore.get_insulin_administrations(
+            user_pk=self._c.user_id,
+            until_utc_timestamp=self._c.current_datetime.utc_timestamp,
+            limit=30,
+            order_by_utc_timestamp=True,
+            order_ascending=False
         )
-        
-        if insulins != None and len(insulins) > 0:
+
+        if len(insulins) > 0:
             return insulins
         
         return []
@@ -285,7 +275,7 @@ day_times with injection ... {}
     
         total_ocurrences = 0.
         for insulin in self._insulins:
-            day_time = self.day_times.nearest_day_time(insulin.datetime)
+            day_time = self.day_times.nearest_day_time(insulin.datetime) ##################################
             total_ocurrences += 1.
             result[day_time]['number_of_ocurrences'] += 1
             result[day_time]['total_doses'] += insulin.dose
@@ -442,7 +432,7 @@ day_times with injection ... {}
         temp_insulins_selected = []
 
         for insulin in self._insulins:
-            if last_day == 0: last_day = insulin.datetime.day
+            if last_day == 0: last_day = insulin.datetime.day  ##################################
             
             if insulin.datetime.day != last_day:
                 last_day = insulin.datetime.day
