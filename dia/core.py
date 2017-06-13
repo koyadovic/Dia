@@ -3,6 +3,8 @@
 from dia.predictive.interfaces import AbstractPredictiveSystem
 from dia.interfaces import DescriptiveRepositoryAdapter
 
+import settings
+
 
 """
 This is the facade of the application
@@ -76,5 +78,11 @@ class DiaCore(DescriptiveRepositoryAdapter):
         """
 
 
+"""
+diacore element is the entry point and can be retrieved as needed
+"""
+diacore = DiaCore(settings.DESCRIPTIVE_REPOSITORY())
 
+for System in settings.PREDICTIVE_SYSTEMS:
+    diacore.add_predictive_system(System())
 
