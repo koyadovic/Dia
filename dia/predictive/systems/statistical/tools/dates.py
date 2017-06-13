@@ -77,6 +77,9 @@ class Datetime(datetime):
         dt = datetime.utcfromtimestamp(timestamp)
         return Datetime(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
     @property
+    def utc_timestamp(self):
+        return int((self - Datetime.utcfromtimestamp(0)).total_seconds())
+    @property
     def seconds_from_epoch(self):
         epoch = Datetime.utcfromtimestamp(0)
         return (self - epoch).total_secs
