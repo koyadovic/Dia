@@ -8,6 +8,8 @@ Expone varias funciones para hacer fácil recoger estos datos.
 """
 from .daytimes import DayTimes
 
+from dia.core import diacore
+
 import logging
 
 # MODELOS
@@ -163,6 +165,16 @@ day_times with injection ... {}
         """
         metodo preferido
         """
+        diacore.get_insulin_administrations(
+            user_pk=self._c.user_id,
+            from_utc_timestamp,
+            until_utc_timestamp,
+            limit,
+            order_by_utc_timestamp,
+            order_ascending
+        )
+        
+        
         insulins = InsulinAdministration.basal_insulins(
             user_id=self._c.user_id,
             from_datetime=self.last_basal_change + Timedelta(days=1),
