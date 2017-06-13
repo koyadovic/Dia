@@ -27,5 +27,15 @@ class AbstractPredictiveSystem:
     @abstractproperty
     def unique_identificator(self):
         raise NotImplementedError
+    
+    """
+    This property must show the name of the system in a human readable way.
+    """
+    @abstractproperty
+    def name(self):
+        raise NotImplementedError
+
+    def __str__(self):
+        return self.name
 
 
