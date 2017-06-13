@@ -212,13 +212,14 @@ dinner: ...... {}
     def is_snack(self, dt):
         return self.nearest_day_time(dt) in self.SNACK_DAY_TIMES
 
-    def nearest_day_time(self, day_time_datetime):
+    def nearest_day_time(self, base_date):
         if not self.mean_feeding_hours:
             return None
 
-        base_date = day_time_datetime.date()
-        if day_time_datetime.hour < 3:
+        if base_date.hour < 3:
             base_date = base_date - Timedelta(days=1)
+        
+        base_date = base_date.date()
         
         br = Datetime.combine(base_date, self.mean_feeding_hours.breakfast)
         lu = Datetime.combine(base_date, self.mean_feeding_hours.lunch)
@@ -236,7 +237,7 @@ dinner: ...... {}
             bb: self.BEFORE_BED_SNACK,
         }
 
-        nearest = Datetime.nearest_datetime_static(day_time_datetime, [br, lu, di, mm, af, bb])
+        nearest = Datetime.nearest_datetime_static(base_date, [br, lu, di, mm, af, bb])
         return result[nearest]
 
         

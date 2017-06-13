@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from dia.predictive.interfaces import AbstractPredictiveSystem
 from dia.interfaces import DescriptiveRepositoryAdapter
+from predictive.interfaces import AbstractPredictiveSystem
 
 import settings
 

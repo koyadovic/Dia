@@ -22,6 +22,7 @@ from ...analysis.basics.context import Context
 
 from sqlalchemy import Column, Integer, Float, DateTime
 from sqlalchemy.ext.declarative import declarative_base
+from predictive.systems.statistical.tools.dates import Datetime
 
 Base = declarative_base(predictive_engine)
 
@@ -30,16 +31,16 @@ class _BasalInsulin24hDoses(Base):
     __tablename__ = 'analysis_basics_basal_doses_24h'
 
     """"""
-    id = Column(Integer, primary_key=True)  # lint:ok
-    user_id = Column(Integer, nullable=False)
+    pk = Column(Integer, primary_key=True)  # lint:ok
+    user_pk = Column(Integer, nullable=False)
     datetime = Column(DateTime, nullable=False, index=True)
 
     # recommended doses absorved in 24 hours
     doses_absorved_24h = Column(Float, nullable=False)
     
     def __str__(self):
-        st = "BasalInsulinNeeds: user_id: {}, datetime: {}, doses_absorved_24h: {}".format(
-            self.user_id,
+        st = "BasalInsulinNeeds: user_pk: {}, datetime: {}, doses_absorved_24h: {}".format(
+            self.user_pk,
             self.datetime,
             self.doses_absorved_24h
         )
@@ -49,7 +50,7 @@ class _BasalInsulin24hDoses(Base):
     def most_recent_record(context):
         s = analysis_session()
         record = s.query(_BasalInsulin24hDoses).\
-            filter(_BasalInsulin24hDoses.user_id == context.user_id).\
+            filter(_BasalInsulin24hDoses.user_pk == context.user_pk).\
             filter(_BasalInsulin24hDoses.datetime <= context.current_datetime).\
             order_by(_BasalInsulin24hDoses.datetime.desc()).\
             first()
@@ -69,8 +70,8 @@ class _BasalInsulinPattern(Base):
     __tablename__ = 'analysis_basics_basal_patterns'
 
     """"""
-    id = Column(Integer, primary_key=True)  # lint:ok
-    user_id = Column(Integer, nullable=False)
+    pk = Column(Integer, primary_key=True)
+    user_pk = Column(Integer, nullable=False)
     datetime = Column(DateTime, nullable=False, index=True)
 
     day_time = Column(Integer, nullable=False)
@@ -78,8 +79,8 @@ class _BasalInsulinPattern(Base):
     proportion = Column(Float, nullable=False) # la proporción usando rounded(proportion, 1) (con un decimal.)
 
     def __str__(self):
-        st = "BasalInsulinPattern: user_id: {}, datetime: {}, day_time: {}, type: {}, proportion: {}".format(
-            self.user_id,
+        st = "BasalInsulinPattern: user_pk: {}, datetime: {}, day_time: {}, type: {}, proportion: {}".format(
+            self.user_pk,
             self.datetime,
             self.day_time,
             self.type,
@@ -91,7 +92,7 @@ class _BasalInsulinPattern(Base):
     def most_recent_record(context):
         s = analysis_session()
         record = s.query(_BasalInsulinPattern).\
-            filter(_BasalInsulinPattern.user_id == context.user_id).\
+            filter(_BasalInsulinPattern.user_pk == context.user_pk).\
             filter(_BasalInsulinPattern.datetime < context.current_datetime).\
             order_by(_BasalInsulinPattern.datetime.desc()).\
             first()
@@ -102,7 +103,7 @@ class _BasalInsulinPattern(Base):
     def records_at_datetime(context, dt):
         s = analysis_session()
         records = s.query(_BasalInsulinPattern).\
-            filter(_BasalInsulinPattern.user_id == context.user_id).\
+            filter(_BasalInsulinPattern.user_pk == context.user_pk).\
             filter(_BasalInsulinPattern.datetime == dt).\
             order_by(_BasalInsulinPattern.datetime.desc()).\
             all()
@@ -153,8 +154,8 @@ day_times with injection ... {}
         return s
 
     @property
-    def user_id(self):
-        return self._c.user_id
+    def user_pk(self):
+        return self._c.user_pk
 
     @property
     def current_datetime(self):
@@ -166,7 +167,7 @@ day_times with injection ... {}
         metodo preferido
         """
         insulins = diacore.get_insulin_administrations(
-            user_pk=self._c.user_id,
+            user_pk=self._c.user_pk,
             from_utc_timestamp=(self.last_basal_change + Timedelta(days=1)).utc_timestamp,
             until_utc_timestamp=self._c.current_datetime.utc_timestamp,
             limit=30,
@@ -181,7 +182,7 @@ day_times with injection ... {}
         Metodo alternativo
         """
         insulins = diacore.get_insulin_administrations(
-            user_pk=self._c.user_id,
+            user_pk=self._c.user_pk,
             until_utc_timestamp=self._c.current_datetime.utc_timestamp,
             limit=30,
             order_by_utc_timestamp=True,
@@ -252,7 +253,6 @@ day_times with injection ... {}
         
         last_result = {}
         most_recent_pattern_record = _BasalInsulinPattern.most_recent_record(self._c)
-        most_recent_pattern_datetime = None
         if most_recent_pattern_record != None:
             most_recent_pattern_datetime = most_recent_pattern_record.datetime
             patterns = _BasalInsulinPattern.records_at_datetime(self._c, most_recent_pattern_datetime)
@@ -275,7 +275,7 @@ day_times with injection ... {}
     
         total_ocurrences = 0.
         for insulin in self._insulins:
-            day_time = self.day_times.nearest_day_time(insulin.datetime) ##################################
+            day_time = self.day_times.nearest_day_time(Datetime.utcfromtimestamp(insulin.utc_timestamp))
             total_ocurrences += 1.
             result[day_time]['number_of_ocurrences'] += 1
             result[day_time]['total_doses'] += insulin.dose
@@ -373,7 +373,7 @@ day_times with injection ... {}
                     continue
 
                 pattern = _BasalInsulinPattern(
-                    user_id=self._c.user_id,
+                    user_pk=self._c.user_pk,
                     datetime=self._c.current_datetime,
                     day_time=day_time,
                     type=result[day_time]['type'],
@@ -432,10 +432,10 @@ day_times with injection ... {}
         temp_insulins_selected = []
 
         for insulin in self._insulins:
-            if last_day == 0: last_day = insulin.datetime.day  ##################################
+            if last_day == 0: last_day = Datetime.utcfromtimestamp(insulin.utc_timestamp).day
             
-            if insulin.datetime.day != last_day:
-                last_day = insulin.datetime.day
+            if Datetime.utcfromtimestamp(insulin.utc_timestamp).day != last_day:
+                last_day = Datetime.utcfromtimestamp(insulin.utc_timestamp).day
                 
                 """
                 Si el número de insulinas administradas temporalmente recogidas
@@ -448,7 +448,7 @@ day_times with injection ... {}
                     Si la lista definitiva tiene 3 días de insulinas en rango, rompemos el bucle
                     """
                     if len(insulins_selected) > 0 and \
-                    round(abs((insulins_selected[0].datetime - insulins_selected[-1].datetime).total_seconds())/60./60./24.) >= 3:
+                    round(abs(insulins_selected[0].utc_timestamp - insulins_selected[-1].utc_timestamp)/60./60./24.) >= 3:
                         break
                 else:
                     """
@@ -490,10 +490,10 @@ day_times with injection ... {}
             
                 last_day = 0.
                 for insulin in self._insulins:
-                    if last_day == 0: last_day = insulin.datetime.day
+                    if last_day == 0: last_day = Datetime.utcfromtimestamp(insulin.utc_timestamp).day
                     
-                    if insulin.datetime.day != last_day:
-                        last_day = insulin.datetime.day
+                    if Datetime.utcfromtimestamp(insulin.utc_timestamp).day != last_day:
+                        last_day = Datetime.utcfromtimestamp(insulin.utc_timestamp).day
                         n += 1
                         
                     total_doses += insulin.dose
@@ -511,7 +511,7 @@ day_times with injection ... {}
                 Tenemos que guardar una nueva entrada
                 """
                 basal_doses = _BasalInsulin24hDoses(
-                    user_id=self._c.user_id,
+                    user_pk=self._c.user_pk,
                     datetime=self._c.current_datetime,
                     doses_absorved_24h=current_24h_doses
                 )
@@ -535,7 +535,7 @@ el guardado, y guardarlo.
 """
 
 def basal_checks(insulin):
-    context = Context(insulin.user_id, insulin.datetime)
+    context = Context(insulin.user_pk, Datetime.utcfromtimestamp(insulin.utc_timestamp))
     day_times = DayTimes(context)
     if day_times.is_ready():
         basal = BasalInsulin(context, day_times)
