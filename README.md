@@ -1,12 +1,12 @@
 # Dia
 
-This is a experimental project currently in intense development state.
+This is a experimental project currently in __intense development state__.
 
-The entry point of the application is dia.core.diacore instance.
+The entry point of the application is _dia.core.diacore_ instance.
 
-For example: from dia.core import diacore
+For example: _from dia.core import diacore_
 
-Previously it needs to be configured in the dia.settings module.
+Previously it needs to be configured in the _dia.settings_ module.
 
 It has:
 
@@ -26,7 +26,7 @@ It has:
 	diacore.get_feedings(user_pk, from_utc_timestamp=None, until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True, order_ascending=True)
 	diacore.get_insulin_administrations(user_pk=None, from_utc_timestamp=None, until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True, order_ascending=True)
 
-	For recommendations:
+* For recommendations:
 	
 	diacore.get_recommendation(user_pk=None, utc_timestamp=None, predictive_system_unique_identificator=None)
 	diacore.all_predictive_systems
