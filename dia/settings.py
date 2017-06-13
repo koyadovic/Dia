@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from dia.predictive.systems.statistical.system import StatisticalPredictiveSystem
+from predictive.systems.statistical.system import StatisticalPredictiveSystem
 
 """
 Subclasses of AbstractPredictiveSystem
