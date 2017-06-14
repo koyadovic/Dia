@@ -17,11 +17,13 @@ from ...analysis.model import analysis_session
 
 from sqlalchemy import Column, Integer, Float, Date
 from sqlalchemy.ext.declarative import declarative_base
-from dia.predictive.systems.statistical.analysis.tools.graphs import Graph
-from dia.predictive.systems.statistical.analysis.tools.property import propertycached
-from dia.predictive.systems.statistical.analysis.basics.context import Context
-from dia.predictive.systems.statistical.analysis.basics.daytimes import DayTimes
-from dia.predictive.systems.statistical.tools.dates import Datetime, Timedelta
+
+from predictive.systems.statistical.analysis.tools.graphs import Graph
+from predictive.systems.statistical.analysis.tools.property import propertycached
+from predictive.systems.statistical.analysis.basics.context import Context
+from predictive.systems.statistical.analysis.basics.daytimes import DayTimes
+from predictive.systems.statistical.tools.dates import Datetime, Timedelta
+from dia.core import diacore
 
 
 Base = declarative_base(predictive_engine)
@@ -32,15 +34,15 @@ class _HbA1cRecord(Base):
 
     """"""
     id = Column(Integer, primary_key=True)  # lint:ok
-    user_id = Column(Integer, nullable=False, index=True)
+    user_pk = Column(Integer, nullable=False, index=True)
     date = Column(Date, nullable=False, index=True)
 
     # recommended doses absorved in 24 hours
     value = Column(Float, nullable=False)
     
     def __str__(self):
-        st = "HbA1cRecord: user_id: {}, date: {}, value: {}".format(
-            self.user_id,
+        st = "HbA1cRecord: user_pk: {}, date: {}, value: {}".format(
+            self.user_pk,
             self.date,
             self.value
         )
@@ -49,7 +51,7 @@ class _HbA1cRecord(Base):
     @staticmethod
     def last_values(**kvargs):
         options = {
-                'user_id': None,
+                'user_pk': None,
                 'from_date': None,
                 'until_date': None,
                 'order_by_date': True,
@@ -58,12 +60,12 @@ class _HbA1cRecord(Base):
     
         options.update(kvargs)
         
-        if options['user_id'] == None:
+        if options['user_pk'] == None:
             return None
 
         se = analysis_session()
         r_query = se.query(_HbA1cRecord).\
-            filter(_HbA1cRecord.user_id == options['user_id'])
+            filter(_HbA1cRecord.user_pk == options['user_pk'])
 
 
         """
@@ -94,16 +96,16 @@ class _HbA1cRecord(Base):
         return r_query.all()
     
     @staticmethod
-    def update_value(user_id, date, value):
+    def update_value(user_pk, date, value):
         se = analysis_session()
         last = se.query(_HbA1cRecord).\
-            filter(_HbA1cRecord.user_id == user_id).\
+            filter(_HbA1cRecord.user_pk == user_pk).\
             filter(_HbA1cRecord.date == date).\
             first()
 
         if last == None:
             record = _HbA1cRecord(
-                user_id=user_id,
+                user_pk=user_pk,
                 date=date,
                 value=value
             )
@@ -248,7 +250,7 @@ class HbA1c(object):
     def __init__(self, context):
         self._c = context
         self.records = _HbA1cRecord.last_values(
-            user_id=self._c.user_id,
+            user_pk=self._c.user_pk,
             until_date=self._c.current_datetime.date(),
             order_by_date=True,
             desc_order=True,
@@ -331,18 +333,14 @@ Estimated value in 90 days .... {}%""".format(
     Si existe un record lo actualiza, si no, añade una nueva entrada
     """
     def recalculate(self, day_times):
-        options = {
-                'user_id': self._c.user_id,
-                'from_datetime': self._c.current_datetime - Timedelta(days=120),
-                'until_datetime': self._c.current_datetime,
-                'order_by_datetime': True,
-                'desc_order': False,
-        }
-        glucoses = GlucoseLevel.glucose_levels(**options)
+        glucoses = diacore.get_glucoses(
+            user_pk=self._c.user_pk,
+            from_utc_timestamp=(self._c.current_datetime - Timedelta(days=120)).utc_timestamp,
+            until_utc_timestamp=self._c.current_datetime.utc_timestamp,
+            order_by_utc_timestamp=True,
+            order_ascending=True
+            )
         
-        if glucoses == None:
-            glucoses = []
-
         value = 0.
         total = 0.
         n = 0.
@@ -352,8 +350,8 @@ Estimated value in 90 days .... {}%""".format(
         snacks_day_times = []
         
         for glucose in glucoses:
-            day_time = day_times.nearest_day_time(glucose.datetime)
-            days_old = (self._c.current_datetime - glucose.datetime).total_days
+            day_time = day_times.nearest_day_time(Datetime.utcfromtimestamp(glucose.utc_timestamp))
+            days_old = (self._c.current_datetime - Datetime.utcfromtimestamp(glucose.utc_timestamp)).total_days
             
             if last_days_old == None: last_days_old = days_old
             
@@ -368,7 +366,7 @@ Estimated value in 90 days .... {}%""".format(
                 meals_day_times = []
                 snacks_day_times = []
             
-            if day_times.is_meal(glucose.datetime):
+            if day_times.is_meal(Datetime.utcfromtimestamp(glucose.utc_timestamp)):
                 meals_day_times.append(day_time)
             else:
                 snacks_day_times.append(day_time)
@@ -378,12 +376,12 @@ Estimated value in 90 days .... {}%""".format(
         
         if n > 0.:
             value = HbA1c._mgdl2hba1cpercentage(total / n)
-            _HbA1cRecord.update_value(self._c.user_id, self._c.current_datetime.date(), value)
+            _HbA1cRecord.update_value(self._c.user_pk, self._c.current_datetime.date(), value)
 
 
 
 def recalculate_hba1c(glucose):
-    context = Context(glucose.user_id, glucose.datetime)
+    context = Context(glucose.user_pk, glucose.utc_timestamp)
 
     day_times = DayTimes(context)
     hba1c = HbA1c(context)

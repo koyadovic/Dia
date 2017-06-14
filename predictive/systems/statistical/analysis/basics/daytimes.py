@@ -3,9 +3,12 @@
 Calculará horas medias de comidas y aperitivos por usuario
 Calculará carbohidratos medios de ingesta por usuario
 """
-from dia.predictive.systems.statistical.analysis.tools.property import propertycached
-from dia.predictive.systems.statistical.tools.dates import Time, Timedelta,\
+from predictive.systems.statistical.analysis.tools.property import propertycached
+from predictive.systems.statistical.tools.dates import Time, Timedelta,\
     Datetime
+
+from dia.models import InsulinType
+from dia.core import diacore
 
 
 """
@@ -55,8 +58,8 @@ class DayTimes(object):
         self._c = context
     
     @property
-    def user_id(self):
-        return self._c.user_id
+    def user_pk(self):
+        return self._c.user_pk
 
     @property
     def current_datetime(self):
@@ -66,12 +69,12 @@ class DayTimes(object):
     def mean_feeding_hours(self):
         # Hacemos una primera aproximación con las insulinas rápidas o cortas
         # administradas. Allí estarán las comidas
-        targets = InsulinAdministration.rapid_short_insulins(
-            user_id=self.user_id,
-            until_datetime=self.current_datetime,
-            order_by_datetime=True,
-            limit=30
-        )
+        insulins = diacore.get_insulin_administrations(
+            user_pk=self.user_pk,
+            limit=30,
+            order_by_utc_timestamp=True)
+        
+        targets = [insulin for insulin in insulins if insulin.insulin_type in [InsulinType.RAPID, InsulinType.SHORT]]
         
         DAY_HOURS = 24
         DAY_MINUTES = DAY_HOURS * 60
@@ -88,7 +91,7 @@ class DayTimes(object):
             i = 0.
             total = 0.
             for target in targets:
-                minutes = Time.time2minutes(target.datetime)
+                minutes = Time.time2minutes(Datetime.utcfromtimestamp(target.utc_timestamp))
                 if minutes < 180:
                     minutes += DAY_MINUTES
                 if minutes >= minute and minutes <= minute + WIDE_MINUTES:
