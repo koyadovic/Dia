@@ -1,12 +1,13 @@
-from predictive.interfaces import AbstractPredictiveSystem
-from dia.interfaces import AbstractDescriptiveRepositoryObserver
+from dia.interfaces import AbstractDescriptiveRepositoryObserver,\
+    AbstractPredictiveSystem
 
 
+from dia.core import diacore
 
 class StatisticalV2PredictiveSystem(AbstractDescriptiveRepositoryObserver, AbstractPredictiveSystem):
     
-    def __init__(self, descriptive_repository):
-        self._descriptive_repository = descriptive_repository
+    def __init__(self):
+        diacore.add_descriptive_repository_observer(self)
     
     @property
     def descriptive_repository(self):

@@ -1,20 +1,17 @@
-from predictive.interfaces import AbstractPredictiveSystem
-from dia.interfaces import AbstractDescriptiveRepositoryObserver
+from dia.interfaces import AbstractDescriptiveRepositoryObserver,\
+    AbstractPredictiveSystem
 
 from .analysis.basics import hba1c
 from .analysis.basics import basalinsulin
 from .analysis.groupings import grouped_feedings
 
+from dia.core import diacore
 
 class StatisticalPredictiveSystem(AbstractDescriptiveRepositoryObserver, AbstractPredictiveSystem):
     
-    def __init__(self, descriptive_repository):
-        self._descriptive_repository = descriptive_repository
-    
-    @property
-    def descriptive_repository(self):
-        return self._descriptive_repository
-
+    def __init__(self):
+        diacore.add_descriptive_repository_observer(self)
+        
     """
     To recalculate if necessary
     """
