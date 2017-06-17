@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, abstractproperty
 
 from dia.models import GlucoseLevel, Activity, Trait, InsulinAdministration, Feeding
 
@@ -310,5 +310,83 @@ class DescriptiveRepositoryAdapter(object):
 
             elif isinstance(target, Trait):
                 o.on_trait_change_added(target)
+
+
+
+
+
+
+"""
+All predictive modules must implement this interface.
+"""
+class AbstractPredictiveSystem:
+    __metaclass__ = ABCMeta
+    """
+    With this method, there is only two possibilities that can occurs:
+    1.- If there is an insulin administration event added:
+    it must be returned a Feeding event, 
+    
+    2.- If there is a Feeding event added:
+    it must be returned a InsulinAdministration event or a modification
+    in de Feeding event and a InsulinAdministration event, the two.
+    """
+    @abstractmethod
+    def get_recommendation(self, context):
+        raise NotImplementedError
+
+    """
+    This property must be unique between differents predictive implementations
+    """
+    @abstractproperty
+    def unique_identificator(self):
+        raise NotImplementedError
+    
+    """
+    This property must show the name of the system in a human readable way.
+    """
+    @abstractproperty
+    def name(self):
+        raise NotImplementedError
+
+    def __str__(self):
+        return self.name
+
+
+
+"""
+This is for the recommendations
+
+Predictive systems must use this object.
+
+The recommendation is compound of InsulinAdministration, Feeding
+or Activity events that must be followed to maintain glucose levels
+in range. Some can be new events, and others can be changed events
+"""
+
+class Recommendation(object):
+    def __init__(self):
+        self._new_events = []
+        self._changed_events = []
+    
+    def _check_event(self, event):
+        assert isinstance(event, InsulinAdministration) or \
+            isinstance(event, Activity) or isinstance(event, Feeding)
+
+    def append_new_event(self, event):
+        self._check_event(event)
+        self._new_events.append(event)
+    
+    @property
+    def new_events(self):
+        return self._new_events
+
+    def append_changed_event(self, event):
+        self._check_event(event)
+        self._changed_events.append(event)
+    
+    @property
+    def changed_events(self):
+        return self._changed_events
+
 
 

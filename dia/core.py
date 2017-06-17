@@ -61,7 +61,7 @@ class DiaCore(DescriptiveRepositoryAdapter):
 
 
     " It will be request a recommendation only to one predictive system "
-    def get_recommendation(self, user_pk=None, utc_timestamp=None, predictive_system_unique_identificator=None):
+    def get_recommendation(self, context=None, predictive_system_unique_identificator=None):
         assert len(self._predictive_systems) > 0, "There is no predictive systems added"
 
         ui = predictive_system_unique_identificator
@@ -70,7 +70,7 @@ class DiaCore(DescriptiveRepositoryAdapter):
 
         for system in self._predictive_systems:
             if system.unique_identificator == ui:
-                return system.get_recommendation(user_pk, utc_timestamp)
+                return system.get_recommendation(context)
         """
         For the response returned see dia.models.Recommendation
         """

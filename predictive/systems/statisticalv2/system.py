@@ -1,12 +1,9 @@
 from predictive.interfaces import AbstractPredictiveSystem
 from dia.interfaces import AbstractDescriptiveRepositoryObserver
 
-from .analysis.basics import hba1c
-from .analysis.basics import basalinsulin
-from .analysis.groupings import grouped_feedings
 
 
-class StatisticalPredictiveSystem(AbstractDescriptiveRepositoryObserver, AbstractPredictiveSystem):
+class StatisticalV2PredictiveSystem(AbstractDescriptiveRepositoryObserver, AbstractPredictiveSystem):
     
     def __init__(self, descriptive_repository):
         self._descriptive_repository = descriptive_repository
@@ -19,14 +16,13 @@ class StatisticalPredictiveSystem(AbstractDescriptiveRepositoryObserver, Abstrac
     To recalculate if necessary
     """
     def on_glucose_added(self, glucose):
-        hba1c.recalculate_hba1c(glucose)
-        grouped_feedings.glucose_inserted(glucose)
+        pass
 
     def on_activity_added(self, activity):
         pass
 
     def on_insulin_administration_added(self, insulin_administration):
-        basalinsulin.basal_checks(insulin_administration)
+        pass
 
     def on_feeding_added(self, feeding):
         pass
@@ -45,11 +41,8 @@ class StatisticalPredictiveSystem(AbstractDescriptiveRepositoryObserver, Abstrac
     """
     @property
     def unique_identificator(self):
-        return "predictive.systems.statisticalpredictivesystem"
+        return "predictive.systems.statisticalv2predictivesystem"
     
     @property
     def name(self):
-        return "Statistical Predictive System v0.1"
-
-
-
+        return "Statistical v2 Predictive System v0.1"
