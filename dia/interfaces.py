@@ -206,7 +206,7 @@ class DescriptiveRepositoryAdapter(object):
         trait = self._r.update_trait(
                 user_pk=trait.user_pk,
                 utc_timestamp=trait.utc_timestamp,
-                trait=trait.trait,
+                kind=trait.kind,
                 value=trait.value
             )
         
@@ -221,36 +221,40 @@ class DescriptiveRepositoryAdapter(object):
     """
     def get_glucoses(self, user_pk, from_utc_timestamp=None,
         until_utc_timestamp=None, mgdl_level_above=None, mgdl_level_below=None,
-        limit=None, order_by_utc_timestamp=True, order_ascending=True):
+        limit=None, order_by_utc_timestamp=True, order_ascending=False):
 
         return self._r.get_glucoses(
-            user_pk=user_pk,
+            user_pk,
             from_utc_timestamp=from_utc_timestamp,
             until_utc_timestamp=until_utc_timestamp,
             mgdl_level_above=mgdl_level_above,
             mgdl_level_below=mgdl_level_below,
-            limit=limit
+            limit=limit,
+            order_by_utc_timestamp=order_by_utc_timestamp,
+            order_ascending=order_ascending
         )
 
 
     def get_activities(self, user_pk, from_utc_timestamp=None,
         until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True,
-        order_ascending=True):
+        order_ascending=False):
 
         return self._r.get_activities(
-            user_pk=user_pk,
+            user_pk,
             from_utc_timestamp=from_utc_timestamp,
             until_utc_timestamp=until_utc_timestamp,
-            limit=limit
+            limit=limit,
+            order_by_utc_timestamp=order_by_utc_timestamp,
+            order_ascending=order_ascending
         )
 
 
     def get_traits(self, user_pk, kind, from_utc_timestamp=None,
         until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True,
-        order_ascending=True):
+        order_ascending=False):
 
         return self._r.get_traits(
-            user_pk=user_pk,
+            user_pk,
             kind=kind,
             from_utc_timestamp=from_utc_timestamp,
             until_utc_timestamp=until_utc_timestamp,
@@ -262,25 +266,29 @@ class DescriptiveRepositoryAdapter(object):
 
     def get_feedings(self, user_pk, from_utc_timestamp=None,
         until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True,
-        order_ascending=True):
+        order_ascending=False):
 
         return self._r.get_feedings(
-            user_pk=user_pk,
+            user_pk,
             from_utc_timestamp=from_utc_timestamp,
             until_utc_timestamp=until_utc_timestamp,
-            limit=limit
+            limit=limit,
+            order_by_utc_timestamp=order_by_utc_timestamp,
+            order_ascending=order_ascending
         )
 
 
     def get_insulin_administrations(self, user_pk, from_utc_timestamp=None,
         until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True,
-        order_ascending=True):
+        order_ascending=False):
 
         return self._r.get_insulin_administrations(
-            user_pk=user_pk,
+            user_pk,
             from_utc_timestamp=from_utc_timestamp,
             until_utc_timestamp=until_utc_timestamp,
-            limit=limit
+            limit=limit,
+            order_by_utc_timestamp=order_by_utc_timestamp,
+            order_ascending=order_ascending
         )
 
 
@@ -406,9 +414,10 @@ in range. Some can be new events, and others can be changed events
 """
 
 class RecommendationResponse(object):
-    def __init__(self):
+    def __init__(self, predictive_unique_id):
         self._new_events = []
         self._changed_events = []
+        self._unique_id = predictive_unique_id
     
     def _check_event(self, event):
         assert isinstance(event, InsulinAdministration) or \
@@ -429,6 +438,14 @@ class RecommendationResponse(object):
     @property
     def changed_events(self):
         return self._changed_events
+    
+    @property
+    def predictive_unique_id(self):
+        """
+        This is the unique indentificator of the predictive system that created
+        the recommendation.
+        """
+        return self._unique_id
 
 
 

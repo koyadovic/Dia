@@ -32,7 +32,8 @@ class DiaCore(DescriptiveRepositoryAdapter):
     def add_descriptive_observer(self, obs):
     """
     def __init__(self, descriptive_repository_class=None):
-        super(DiaCore, self).__init__(repository=descriptive_repository_class())
+        assert descriptive_repository_class
+        super(DiaCore, self).__init__(descriptive_repository_class())
 
         " list of predictive systems to use "
         self._predictive_systems = []
@@ -79,7 +80,7 @@ class DiaCore(DescriptiveRepositoryAdapter):
 """
 diacore element is the entry point and can be retrieved as needed
 """
-diacore = DiaCore(settings.DESCRIPTIVE_REPOSITORY())
+diacore = DiaCore(settings.DESCRIPTIVE_REPOSITORY)
 
 for System in settings.PREDICTIVE_SYSTEMS:
     diacore.add_predictive_system(System())

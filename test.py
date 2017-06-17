@@ -1,7 +1,7 @@
 
 from dia.core import diacore
-from dia.models import GlucoseLevel
+from dia.models import Trait, TraitKind
 
-g = GlucoseLevel(user_pk=1, utc_timestamp=0, mgdl_level=120)
-g = diacore.add_glucose_level(g)
-print g
+
+
+print diacore.get_traits(1, kind=TraitKind.HEIGHT_CM, limit=1)[0]

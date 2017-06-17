@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from predictive.systems.statisticalv2.system import StatisticalV2PredictiveSystem
-from descriptive_repository.sqlalchemy import SQLAlchemyDescriptiveRepository
+from descriptive_repository.sqlalchemy_repository import SQLAlchemyDescriptiveRepository
 
 """
 Subclasses of AbstractPredictiveSystem

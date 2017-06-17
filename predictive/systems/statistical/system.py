@@ -28,7 +28,7 @@ class StatisticalPredictiveSystem(AbstractDescriptiveRepositoryObserver, Abstrac
     def on_feeding_added(self, feeding):
         pass
 
-    def on_trait_change(self, trait):
+    def on_trait_change_added(self, trait):
         pass
 
     """

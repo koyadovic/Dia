@@ -9,7 +9,8 @@ from abc import ABCMeta
 Base abstract class to identificate all the app models as the same, in some circumstances 
 """
 class DescriptiveModel:
-    __metaclass__ = ABCMeta
+    # __metaclass__ = ABCMeta
+    pass
 
 
 """"""

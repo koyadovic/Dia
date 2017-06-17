@@ -2,11 +2,11 @@ from dia.interfaces import AbstractDescriptiveRepositoryObserver,\
     AbstractPredictiveSystem
 
 
-from dia.core import diacore
 
 class StatisticalV2PredictiveSystem(AbstractDescriptiveRepositoryObserver, AbstractPredictiveSystem):
     
     def __init__(self):
+        from dia.core import diacore
         diacore.add_descriptive_repository_observer(self)
     
     @property
@@ -28,7 +28,7 @@ class StatisticalV2PredictiveSystem(AbstractDescriptiveRepositoryObserver, Abstr
     def on_feeding_added(self, feeding):
         pass
 
-    def on_trait_change(self, trait):
+    def on_trait_change_added(self, trait):
         pass
 
     """
