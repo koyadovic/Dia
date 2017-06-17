@@ -3,6 +3,7 @@ from ...analysis.tools.property import propertycached
 from ...tools.dates import Datetime, Timedelta
 
 from dia.models import TraitKind, TraitKindSexValue
+from dia.core import diacore
 
 
 
@@ -44,8 +45,8 @@ blood_liters ............... {} L
         return s
 
     @property
-    def user_id(self):
-        return self._c.user_id
+    def user_pk(self):
+        return self._c.user_pk
 
     @property
     def current_datetime(self):
@@ -67,53 +68,72 @@ blood_liters ............... {} L
         
     @propertycached
     def sex(self):
-        return Trait.get_trait(self.user_id, TraitKind.SEX)
+        try:
+            return diacore.get_traits(user_pk=self.user_pk, kind=TraitKind.SEX, order_ascending=False, limit=1)[0]
+        except IndexError:
+            return None
     
     @propertycached
     def height(self):
-        return BodyTraits._float(Trait.get_trait(self.user_id, TraitKind.HEIGHT_CM))
+        try:
+            return diacore.get_traits(user_pk=self.user_pk, kind=TraitKind.HEIGHT_CM, order_ascending=False, limit=1)[0]
+        except IndexError:
+            return None
     
     @propertycached
     def weight(self):
-        return BodyTraits._float(Trait.get_trait(self.user_id, TraitKind.WEIGHT_KG))
+        try:
+            return diacore.get_traits(user_pk=self.user_pk, kind=TraitKind.WEIGHT_KG, order_ascending=False, limit=1)[0]
+        except IndexError:
+            return None
 
     @propertycached
     def neck(self):
-        return BodyTraits._float(Trait.get_trait(self.user_id, TraitKind.NECK_PERIMETER_CM))
+        try:
+            return diacore.get_traits(user_pk=self.user_pk, kind=TraitKind.NECK_PERIMETER_CM, order_ascending=False, limit=1)[0]
+        except IndexError:
+            return None
 
     @propertycached
     def abdomen(self):
-        return BodyTraits._float(Trait.get_trait(self.user_id, TraitKind.ABDOMEN_PERIMETER_CM))
+        try:
+            return diacore.get_traits(user_pk=self.user_pk, kind=TraitKind.ABDOMEN_PERIMETER_CM, order_ascending=False, limit=1)[0]
+        except IndexError:
+            return None
 
     @propertycached
     def waist(self):
-        return BodyTraits._float(Trait.get_trait(self.user_id, TraitKind.WAIST_PERIMETER_CM))
+        try:
+            return diacore.get_traits(user_pk=self.user_pk, kind=TraitKind.WAIST_PERIMETER_CM, order_ascending=False, limit=1)[0]
+        except IndexError:
+            return None
 
     @propertycached
     def age(self):
-        """
-        TODO
-        
-        Hay que cambiar el birth from epoc a birth utc timestamp
-        """
-        birth_from_epoc = BodyTraits._int(Trait.get_trait(self.user_id, TraitKind.BIRTH_UTC_TIMESTAMP))
-        timedelta = self.current_datetime - Datetime.utcfromtimestamp(birth_from_epoc)
+        try:
+            birth_utc_timestamp = diacore.get_traits(user_pk=self.user_pk, kind=TraitKind.BIRTH_UTC_TIMESTAMP, order_ascending=False, limit=1)[0]
+        except IndexError:
+            return None
+
+        timedelta = self.current_datetime - Datetime.utcfromtimestamp(birth_utc_timestamp)
         return timedelta.total_years
     
     @propertycached
     def activity_footprint(self):
-        options = {
-            'user_id': self.user_id,
-            'from_datetime': self.current_datetime - Timedelta(days=30)}
-        activities = Activity.activities(**options)
+        
+        activities = diacore.get_activities(
+            user_pk=self.user_pk,
+            from_utc_timestamp=(self.current_datetime - Timedelta(days=30)).utc_timestamp
+        )
 
         last_day = 0
         max_intensity = 0
         footprints = []
     
         for activity in activities:
-            if last_day != 0 and activity.datetime.day != last_day:
-                last_day = activity.datetime.day
+            activity_datetime = Datetime.utcfromtimestamp(activity.utc_timestamp)
+            if last_day != 0 and activity_datetime.day != last_day:
+                last_day = activity_datetime.day
                 footprints.append((max_intensity/4.)*10.)
                 max_intensity = 0
     
@@ -121,7 +141,7 @@ blood_liters ............... {} L
                 max_intensity = activity.intensity
     
             if last_day == 0:
-                last_day = activity.datetime.day
+                last_day = activity_datetime.day
         r = 0
         if len(footprints) > 0:
             r = float(sum(footprints)) / float(len(footprints))

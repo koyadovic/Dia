@@ -1,26 +1,31 @@
 # -*- coding: utf-8 -*-
 
+
+########################################################################
+
 from abc import ABCMeta
 
-
+"""
+Base abstract class to identificate all the app models as the same, in some circumstances 
+"""
 class DescriptiveModel:
-    __metaclass__ = ABCMeta
+    # __metaclass__ = ABCMeta
+    pass
 
 
+""""""
 class Trait(DescriptiveModel):
     pk            = None
     user_pk       = None
     utc_timestamp = None
     kind          = None
     value         = None
-
     def __init__(self, pk=None, user_pk=None, utc_timestamp=None, kind=None, value=None):
         self.pk            = pk
         self.user_pk       = user_pk
         self.utc_timestamp = utc_timestamp
         self.kind          = kind
         self.value         = value
-    
     def __iter__(self):
         """
         With this, only with a dict(obj) the object is automatically
@@ -32,11 +37,11 @@ class Trait(DescriptiveModel):
         yield 'utc_timestamp', self.utc_timestamp
         yield 'kind', self.kind
         yield 'value', self.value
-    
     def __str__(self):
         return '{}: {}'.format(type(self).__name__, dict(self))
     
 
+""""""
 class GlucoseLevel(DescriptiveModel):
     pk            = None
     user_pk       = None
@@ -60,6 +65,7 @@ class GlucoseLevel(DescriptiveModel):
         return '{}: {}'.format(type(self).__name__, dict(self))
 
 
+""""""
 class Activity(DescriptiveModel):
     pk            = None
     user_pk       = None
@@ -86,6 +92,7 @@ class Activity(DescriptiveModel):
         return '{}: {}'.format(type(self).__name__, dict(self))
 
 
+""""""
 class InsulinAdministration(DescriptiveModel):
     pk            = None
     user_pk       = None
@@ -112,6 +119,7 @@ class InsulinAdministration(DescriptiveModel):
         return '{}: {}'.format(type(self).__name__, dict(self))
 
 
+""""""
 class Feeding(DescriptiveModel):
     pk            = None
     user_pk       = None
@@ -194,31 +202,4 @@ class InsulinType:
 
     __metaclass__ = ABCMeta
     
-
-
-
-
-
-"""
-This is for the recommendations
-
-Predictive systems must use this object.
-
-The recommendation is compound of InsulinAdministration, Feeding
-or Activity events that must be followed to maintain glucose levels
-in range.
-"""
-
-class Recommendation(DescriptiveModel):
-    def __init__(self):
-        self._events = []
-
-    def append_event(self, event):
-        assert isinstance(event, InsulinAdministration) or \
-            isinstance(event, Activity) or isinstance(event, Feeding)
-        self._events.append(event)
-    
-    @property
-    def events(self):
-        return self._events
 

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from dia.predictive.interfaces import AbstractPredictiveSystem
-from dia.interfaces import DescriptiveRepositoryAdapter
+from dia.interfaces import DescriptiveRepositoryAdapter, AbstractPredictiveSystem, RecommendationResponse,\
+    PredictiveRequestContext
 
-import settings
+from . import settings
 
 
 """
@@ -25,14 +25,15 @@ class DiaCore(DescriptiveRepositoryAdapter):
     For querys, not all parameters are mandatory
     def get_glucoses(self, user_pk, from_utc_timestamp=None, until_utc_timestamp=None, mgdl_level_above=None, mgdl_level_below=None, limit=None, order_by_utc_timestamp=True, order_ascending=True):
     def get_activities(self, user_pk, from_utc_timestamp=None, until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True, order_ascending=True):
-    def get_traits(self, user_pk, trait, from_utc_timestamp=None, until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True, order_ascending=True):
+    def get_traits(self, user_pk, kind, from_utc_timestamp=None, until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True, order_ascending=True):
     def get_feedings(self, user_pk, from_utc_timestamp=None, until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True, order_ascending=True):
     def get_insulin_administrations(self, user_pk=None, from_utc_timestamp=None, until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True, order_ascending=True):
 
     def add_descriptive_observer(self, obs):
     """
     def __init__(self, descriptive_repository_class=None):
-        super(DiaCore, self).__init__(repository=descriptive_repository_class())
+        assert descriptive_repository_class
+        super(DiaCore, self).__init__(descriptive_repository_class())
 
         " list of predictive systems to use "
         self._predictive_systems = []
@@ -55,31 +56,31 @@ class DiaCore(DescriptiveRepositoryAdapter):
         " add the system "
         self._predictive_systems.append(system)
 
-        " add the system as observer of the descriptive events "
-        self.add_descriptive_observer(system)
-        " With this, all will be notified for if they need to make recalculations "
 
 
     " It will be request a recommendation only to one predictive system "
-    def get_recommendation(self, user_pk=None, utc_timestamp=None, predictive_system_unique_identificator=None):
+    def get_recommendation(self, context, predictive_system_unique_identificator=None):
         assert len(self._predictive_systems) > 0, "There is no predictive systems added"
-
-        ui = predictive_system_unique_identificator
-        assert ui in [system.unique_identificator for system in self._predictive_systems],\
-            "There is no predictive system called {}".format(ui)
+        assert isinstance(context, PredictiveRequestContext)
+        
+        unique_id = predictive_system_unique_identificator
+        assert unique_id in [system.unique_identificator for system in self._predictive_systems],\
+            "There is no predictive system with unique id {}".format(unique_id)
 
         for system in self._predictive_systems:
-            if system.unique_identificator == ui:
-                return system.get_recommendation(user_pk, utc_timestamp)
+            if system.unique_identificator == unique_id:
+                recommendation = system.get_recommendation(context)
+                assert isinstance(recommendation, RecommendationResponse)
+                return recommendation
         """
-        For the response returned see dia.models.Recommendation
+        For the response returned see dia.interfaces.Recommendation
         """
 
 
 """
 diacore element is the entry point and can be retrieved as needed
 """
-diacore = DiaCore(settings.DESCRIPTIVE_REPOSITORY())
+diacore = DiaCore(settings.DESCRIPTIVE_REPOSITORY)
 
 for System in settings.PREDICTIVE_SYSTEMS:
     diacore.add_predictive_system(System())

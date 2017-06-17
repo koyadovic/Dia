@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, abstractproperty
 
 from dia.models import GlucoseLevel, Activity, Trait, InsulinAdministration, Feeding
 
@@ -38,8 +38,7 @@ class AbstractDescriptiveRepository:
         raise NotImplementedError
 
     @abstractmethod
-    def add_insulin_administration(self, user_pk, utc_timestamp, insulin_type,
-        insulin_units):
+    def add_insulin_administration(self, user_pk, utc_timestamp, insulin_type, insulin_units):
         "Must return the InsulinAdministration instance added"
         raise NotImplementedError
 
@@ -207,7 +206,7 @@ class DescriptiveRepositoryAdapter(object):
         trait = self._r.update_trait(
                 user_pk=trait.user_pk,
                 utc_timestamp=trait.utc_timestamp,
-                trait=trait.trait,
+                kind=trait.kind,
                 value=trait.value
             )
         
@@ -222,37 +221,41 @@ class DescriptiveRepositoryAdapter(object):
     """
     def get_glucoses(self, user_pk, from_utc_timestamp=None,
         until_utc_timestamp=None, mgdl_level_above=None, mgdl_level_below=None,
-        limit=None, order_by_utc_timestamp=True, order_ascending=True):
+        limit=None, order_by_utc_timestamp=True, order_ascending=False):
 
         return self._r.get_glucoses(
-            user_pk=user_pk,
+            user_pk,
             from_utc_timestamp=from_utc_timestamp,
             until_utc_timestamp=until_utc_timestamp,
             mgdl_level_above=mgdl_level_above,
             mgdl_level_below=mgdl_level_below,
-            limit=limit
+            limit=limit,
+            order_by_utc_timestamp=order_by_utc_timestamp,
+            order_ascending=order_ascending
         )
 
 
     def get_activities(self, user_pk, from_utc_timestamp=None,
         until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True,
-        order_ascending=True):
+        order_ascending=False):
 
         return self._r.get_activities(
-            user_pk=user_pk,
+            user_pk,
             from_utc_timestamp=from_utc_timestamp,
             until_utc_timestamp=until_utc_timestamp,
-            limit=limit
+            limit=limit,
+            order_by_utc_timestamp=order_by_utc_timestamp,
+            order_ascending=order_ascending
         )
 
 
-    def get_traits(self, user_pk, trait, from_utc_timestamp=None,
+    def get_traits(self, user_pk, kind, from_utc_timestamp=None,
         until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True,
-        order_ascending=True):
+        order_ascending=False):
 
         return self._r.get_traits(
-            user_pk=user_pk,
-            trait=trait,
+            user_pk,
+            kind=kind,
             from_utc_timestamp=from_utc_timestamp,
             until_utc_timestamp=until_utc_timestamp,
             limit=limit,
@@ -263,25 +266,29 @@ class DescriptiveRepositoryAdapter(object):
 
     def get_feedings(self, user_pk, from_utc_timestamp=None,
         until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True,
-        order_ascending=True):
+        order_ascending=False):
 
         return self._r.get_feedings(
-            user_pk=user_pk,
+            user_pk,
             from_utc_timestamp=from_utc_timestamp,
             until_utc_timestamp=until_utc_timestamp,
-            limit=limit
+            limit=limit,
+            order_by_utc_timestamp=order_by_utc_timestamp,
+            order_ascending=order_ascending
         )
 
 
     def get_insulin_administrations(self, user_pk, from_utc_timestamp=None,
         until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True,
-        order_ascending=True):
+        order_ascending=False):
 
         return self._r.get_insulin_administrations(
-            user_pk=user_pk,
+            user_pk,
             from_utc_timestamp=from_utc_timestamp,
             until_utc_timestamp=until_utc_timestamp,
-            limit=limit
+            limit=limit,
+            order_by_utc_timestamp=order_by_utc_timestamp,
+            order_ascending=order_ascending
         )
 
 
@@ -310,5 +317,135 @@ class DescriptiveRepositoryAdapter(object):
 
             elif isinstance(target, Trait):
                 o.on_trait_change_added(target)
+
+
+
+
+"""
+All predictive modules must implement this interface.
+"""
+class AbstractPredictiveSystem:
+    __metaclass__ = ABCMeta
+    """
+    With this method, there is only two possibilities that can occurs:
+    1.- If there is an insulin administration event added:
+    it must be returned a Feeding event, 
+    
+    2.- If there is a Feeding event added:
+    it must be returned a InsulinAdministration event or a modification
+    in de Feeding event and a InsulinAdministration event, the two.
+    """
+    @abstractmethod
+    def get_recommendation(self, context):
+        raise NotImplementedError
+
+    """
+    This property must be unique between differents predictive implementations
+    """
+    @abstractproperty
+    def unique_identificator(self):
+        raise NotImplementedError
+    
+    """
+    This property must show the name of the system in a human readable way.
+    """
+    @abstractproperty
+    def name(self):
+        raise NotImplementedError
+
+    def __str__(self):
+        return self.name
+
+
+
+from datetime import datetime
+import pytz
+
+class PredictiveRequestContext(object):
+    """
+    This is the main object that can be used to situate every query
+    in a date and time point for a single user.
+    
+    Is used to detail the context in which a recommendation request is made.
+    """
+    def __init__(self, user_pk, utc_timestamp, tzinfo=pytz.utc):
+        self._u = user_pk
+        self._ts = utc_timestamp
+        self._tz = tzinfo
+
+    @property
+    def user_pk(self):
+        return self._u
+    
+    @property
+    def utc_timestamp(self):
+        return self._ts
+    
+    @property
+    def tzinfo(self):
+        return self._tz
+    
+    @property
+    def utc_datetime(self):
+        return datetime.fromtimestamp(self._ts, pytz.utc)
+    
+    @property
+    def local_datetime(self):
+        return self.utc_datetime.astimezone(self._tz)
+    
+    def __iter__(self):
+        " With this, only with a dict(obj) the object is automatically converted as a dict. "
+        yield 'user_pk', self.user_pk
+        yield 'utc_timestamp', self.utc_timestamp
+        yield 'tzinfo', str(self.tzinfo)
+    
+    def __str__(self):
+        return '{}: {}'.format(type(self).__name__, dict(self))
+
+
+"""
+This is for the recommendations responses
+
+Predictive systems must return instances of this object.
+
+The recommendation is compound of InsulinAdministration, Feeding
+or Activity events that must be followed to maintain glucose levels
+in range. Some can be new events, and others can be changed events
+"""
+
+class RecommendationResponse(object):
+    def __init__(self, predictive_unique_id):
+        self._new_events = []
+        self._changed_events = []
+        self._unique_id = predictive_unique_id
+    
+    def _check_event(self, event):
+        assert isinstance(event, InsulinAdministration) or \
+            isinstance(event, Activity) or isinstance(event, Feeding)
+
+    def append_new_event(self, event):
+        self._check_event(event)
+        self._new_events.append(event)
+    
+    @property
+    def new_events(self):
+        return self._new_events
+
+    def append_changed_event(self, event):
+        self._check_event(event)
+        self._changed_events.append(event)
+    
+    @property
+    def changed_events(self):
+        return self._changed_events
+    
+    @property
+    def predictive_unique_id(self):
+        """
+        This is the unique indentificator of the predictive system that created
+        the recommendation.
+        """
+        return self._unique_id
+
 
 
