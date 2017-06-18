@@ -99,8 +99,22 @@ One instance per user
 
 user must be an instance of dia.models.User
 timestamp must be a flat integer
+
+For example:
+handler = UserHandler(user_pk=1) # if not timestamp is specified it defaults to current timestamp
+handler = UserHandler(user_pk=2, timestamp=1497799545) 
+
+# last three activities
+for activity in handler.get_activities(limit=3):
+    print activity
+
+# add a new glucose level
+glucose = handler.add_glucose(mgdl_level=135)
+
+# get the last feeding record added
+feeding = handler.get_feedings(limit=1)[0]
 """
-class DiaUserHandler(object):
+class UserHandler(object):
     def __init__(self, user_pk=None, timestamp=None):
         self.diacore = diacore
         self.user = self.diacore.get_user(user_pk)
@@ -168,3 +182,19 @@ class DiaUserHandler(object):
             user_pk=self.user.pk, key=key, value=value
         )
         return self.diacore.update_configuration(config)
+
+    def get_glucoses(self, **kvargs):
+        return self.diacore.get_glucoses(user_pk=self.user.pk, **kvargs)
+    
+    def get_activities(self, **kvargs):
+        return self.diacore.get_activities(user_pk=self.user.pk, **kvargs)
+    
+    def get_feedings(self, **kvargs):
+        return self.diacore.get_feedings(user_pk=self.user.pk, **kvargs)
+    
+    def get_insulin_administrations(self, **kvargs):
+        return self.diacore.get_insulin_administrations(user_pk=self.user.pk, **kvargs)
+
+    def get_traits(self, **kvargs):
+        return self.diacore.get_traits(user_pk=self.user.pk, **kvargs)
+
