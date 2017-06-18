@@ -62,3 +62,7 @@ target/
 \.project
 
 \.settings/
+
+descriptive_repository/sqlalchemy\.db
+
+test\.py

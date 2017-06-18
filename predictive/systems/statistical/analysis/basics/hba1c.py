@@ -335,8 +335,8 @@ Estimated value in 90 days .... {}%""".format(
     def recalculate(self, day_times):
         glucoses = diacore.get_glucoses(
             user_pk=self._c.user_pk,
-            from_utc_timestamp=(self._c.current_datetime - Timedelta(days=120)).utc_timestamp,
-            until_utc_timestamp=self._c.current_datetime.utc_timestamp,
+            from_utc_timestamp=(self._c.current_datetime - Timedelta(days=120)).timestamp,
+            until_utc_timestamp=self._c.current_datetime.timestamp,
             order_by_utc_timestamp=True,
             order_ascending=True
             )
@@ -350,8 +350,8 @@ Estimated value in 90 days .... {}%""".format(
         snacks_day_times = []
         
         for glucose in glucoses:
-            day_time = day_times.nearest_day_time(Datetime.utcfromtimestamp(glucose.utc_timestamp))
-            days_old = (self._c.current_datetime - Datetime.utcfromtimestamp(glucose.utc_timestamp)).total_days
+            day_time = day_times.nearest_day_time(Datetime.utcfromtimestamp(glucose.timestamp))
+            days_old = (self._c.current_datetime - Datetime.utcfromtimestamp(glucose.timestamp)).total_days
             
             if last_days_old == None: last_days_old = days_old
             
@@ -366,7 +366,7 @@ Estimated value in 90 days .... {}%""".format(
                 meals_day_times = []
                 snacks_day_times = []
             
-            if day_times.is_meal(Datetime.utcfromtimestamp(glucose.utc_timestamp)):
+            if day_times.is_meal(Datetime.utcfromtimestamp(glucose.timestamp)):
                 meals_day_times.append(day_time)
             else:
                 snacks_day_times.append(day_time)
@@ -381,7 +381,7 @@ Estimated value in 90 days .... {}%""".format(
 
 
 def recalculate_hba1c(glucose):
-    context = Context(glucose.user_pk, glucose.utc_timestamp)
+    context = Context(glucose.user_pk, glucose.timestamp)
 
     day_times = DayTimes(context)
     hba1c = HbA1c(context)

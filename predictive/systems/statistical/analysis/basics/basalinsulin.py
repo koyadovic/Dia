@@ -168,8 +168,8 @@ day_times with injection ... {}
         """
         insulins = diacore.get_insulin_administrations(
             user_pk=self._c.user_pk,
-            from_utc_timestamp=(self.last_basal_change + Timedelta(days=1)).utc_timestamp,
-            until_utc_timestamp=self._c.current_datetime.utc_timestamp,
+            from_utc_timestamp=(self.last_basal_change + Timedelta(days=1)).timestamp,
+            until_utc_timestamp=self._c.current_datetime.timestamp,
             limit=30,
             order_by_utc_timestamp=True,
             order_ascending=False
@@ -183,7 +183,7 @@ day_times with injection ... {}
         """
         insulins = diacore.get_insulin_administrations(
             user_pk=self._c.user_pk,
-            until_utc_timestamp=self._c.current_datetime.utc_timestamp,
+            until_utc_timestamp=self._c.current_datetime.timestamp,
             limit=30,
             order_by_utc_timestamp=True,
             order_ascending=False
@@ -275,7 +275,7 @@ day_times with injection ... {}
     
         total_ocurrences = 0.
         for insulin in self._insulins:
-            day_time = self.day_times.nearest_day_time(Datetime.utcfromtimestamp(insulin.utc_timestamp))
+            day_time = self.day_times.nearest_day_time(Datetime.utcfromtimestamp(insulin.timestamp))
             total_ocurrences += 1.
             result[day_time]['number_of_ocurrences'] += 1
             result[day_time]['total_doses'] += insulin.dose
@@ -432,10 +432,10 @@ day_times with injection ... {}
         temp_insulins_selected = []
 
         for insulin in self._insulins:
-            if last_day == 0: last_day = Datetime.utcfromtimestamp(insulin.utc_timestamp).day
+            if last_day == 0: last_day = Datetime.utcfromtimestamp(insulin.timestamp).day
             
-            if Datetime.utcfromtimestamp(insulin.utc_timestamp).day != last_day:
-                last_day = Datetime.utcfromtimestamp(insulin.utc_timestamp).day
+            if Datetime.utcfromtimestamp(insulin.timestamp).day != last_day:
+                last_day = Datetime.utcfromtimestamp(insulin.timestamp).day
                 
                 """
                 Si el número de insulinas administradas temporalmente recogidas
@@ -448,7 +448,7 @@ day_times with injection ... {}
                     Si la lista definitiva tiene 3 días de insulinas en rango, rompemos el bucle
                     """
                     if len(insulins_selected) > 0 and \
-                    round(abs(insulins_selected[0].utc_timestamp - insulins_selected[-1].utc_timestamp)/60./60./24.) >= 3:
+                    round(abs(insulins_selected[0].timestamp - insulins_selected[-1].timestamp)/60./60./24.) >= 3:
                         break
                 else:
                     """
@@ -490,10 +490,10 @@ day_times with injection ... {}
             
                 last_day = 0.
                 for insulin in self._insulins:
-                    if last_day == 0: last_day = Datetime.utcfromtimestamp(insulin.utc_timestamp).day
+                    if last_day == 0: last_day = Datetime.utcfromtimestamp(insulin.timestamp).day
                     
-                    if Datetime.utcfromtimestamp(insulin.utc_timestamp).day != last_day:
-                        last_day = Datetime.utcfromtimestamp(insulin.utc_timestamp).day
+                    if Datetime.utcfromtimestamp(insulin.timestamp).day != last_day:
+                        last_day = Datetime.utcfromtimestamp(insulin.timestamp).day
                         n += 1
                         
                     total_doses += insulin.dose
@@ -535,7 +535,7 @@ el guardado, y guardarlo.
 """
 
 def basal_checks(insulin):
-    context = Context(insulin.user_pk, Datetime.utcfromtimestamp(insulin.utc_timestamp))
+    context = Context(insulin.user_pk, Datetime.utcfromtimestamp(insulin.timestamp))
     day_times = DayTimes(context)
     if day_times.is_ready():
         basal = BasalInsulin(context, day_times)

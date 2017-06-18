@@ -42,7 +42,7 @@ class Datetime(datetime):
     def combine(dt, t):
         return Datetime(dt.year, dt.month, dt.day, t.hour, t.minute, t.second)
     @staticmethod
-    def nearest_datetime(dt, dt_list):
+    def nearest_datetime_static(dt, dt_list):
         nearest_dt = None
         nearest_minutes = None
         for element in dt_list:

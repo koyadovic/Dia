@@ -2,7 +2,8 @@
 
 from abc import ABCMeta, abstractmethod, abstractproperty
 
-from dia.models import GlucoseLevel, Activity, Trait, InsulinAdministration, Feeding
+from dia.models import GlucoseLevel, Activity, Trait, InsulinAdministration, Feeding,\
+    Configuration
 
 
 class AbstractDescriptiveRepository:
@@ -11,77 +12,97 @@ class AbstractDescriptiveRepository:
     """
     pk references to something that could be used to identify to each element
     user_pk exactly equal. It will have to identify only one user inside the system
+    timestamp is an integer, not dia.time.Timestamp object
     """
 
     @abstractmethod
-    def add_glucose_level(self, user_pk, utc_timestamp, mgdl_level):
+    def add_glucose_level(self, user_pk, timestamp, mgdl_level):
         "Must return the GlucoseLevel instance added"
         raise NotImplementedError
 
     @abstractmethod
-    def get_glucoses(self, user_pk, from_utc_timestamp=None,
-        until_utc_timestamp=None, mgdl_level_above=None, mgdl_level_below=None,
-        limit=None, order_by_utc_timestamp=True, order_ascending=True):
-        "Must be returned a List of GlucoseLevel instances. [] if empty"
-        raise NotImplementedError
-
-    @abstractmethod
-    def add_activity(self, user_pk, utc_timestamp, intensity, minutes):
+    def add_activity(self, user_pk, timestamp, intensity, minutes):
         "Must return the Activity instance added"
         raise NotImplementedError
 
     @abstractmethod
-    def get_activities(self, user_pk, from_utc_timestamp=None,
-        until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True,
-        order_ascending=True):
-        "Must be returned a List of Activity instances. [] if empty"
-        raise NotImplementedError
-
-    @abstractmethod
-    def add_insulin_administration(self, user_pk, utc_timestamp, insulin_type, insulin_units):
+    def add_insulin_administration(self, user_pk, timestamp, insulin_type, insulin_units):
         "Must return the InsulinAdministration instance added"
         raise NotImplementedError
 
     @abstractmethod
-    def get_insulin_administrations(self, user_pk, from_utc_timestamp=None,
-        until_utc_timestamp=None, insulin_types_in=None, limit=None,
-        order_by_utc_timestamp=True, order_ascending=True):
-        "Must be returned a List of InsulinAdministration instances. [] if empty"
-        raise NotImplementedError
-
-
-    @abstractmethod
-    def add_feeding(self, user_pk, utc_timestamp, total_gr=0, total_ml=0,
+    def add_feeding(self, user_pk, timestamp, total_gr=0, total_ml=0,
         carb_gr=0, protein_gr=0, fat_gr=0, fiber_gr=0, alcohol_gr=0):
         "Must return the Feeding instance added"
         raise NotImplementedError
 
     @abstractmethod
-    def get_feedings(self, user_pk, from_utc_timestamp=None,
-        until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True,
-        order_ascending=True):
-        "Must be returned a List of Feeding instances. [] if empty"
-        raise NotImplementedError
-
-
-
-    @abstractmethod
-    def update_trait(self, user_pk, utc_timestamp, kind, value):
+    def update_trait(self, user_pk, timestamp, kind, value):
         """
         kind is one of dia.models.TraitKind
         value's are also specified on the same model class
         must be returned the Trait object added
         """
         raise NotImplementedError
-    
+
+    @abstractmethod
+    def update_configuration(self, user_pk, key, value):
+        """
+        key is one of dia.models.ConfigurationKey
+        It's only needed to store one value per key, not new records per each change
+        value is algo specified in the same model class
+        """
+        raise NotImplementedError
+
+    """
+    Querys
+    """    
+    @abstractmethod
+    def get_glucoses(self, user_pk, from_timestamp=None,
+        until_timestamp=None, mgdl_level_above=None, mgdl_level_below=None,
+        limit=None, order_by_timestamp=True, order_ascending=True):
+        "Must be returned a List of GlucoseLevel instances. [] if empty"
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_activities(self, user_pk, from_timestamp=None,
+        until_timestamp=None, limit=None, order_by_timestamp=True,
+        order_ascending=True):
+        "Must be returned a List of Activity instances. [] if empty"
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_insulin_administrations(self, user_pk, from_timestamp=None,
+        until_timestamp=None, insulin_types_in=None, limit=None,
+        order_by_timestamp=True, order_ascending=True):
+        "Must be returned a List of InsulinAdministration instances. [] if empty"
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_feedings(self, user_pk, from_timestamp=None,
+        until_timestamp=None, limit=None, order_by_timestamp=True,
+        order_ascending=True):
+        "Must be returned a List of Feeding instances. [] if empty"
+        raise NotImplementedError
+  
     """
     get_traits("1", whatever, order_ascending=False, limit=1) nos daria el ultimo
     """
     @abstractmethod
-    def get_traits(self, user_pk, trait, from_utc_timestamp=None,
-        until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True,
+    def get_traits(self, user_pk, kind, from_timestamp=None,
+        until_timestamp=None, limit=None, order_by_timestamp=True,
         order_ascending=True):
         "Must be returned a List of Trait instances. [] if empty"
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_configuration(self, user_pk, key):
+        "Must be returned the value of the key requested"
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_user(self, user_pk):
+        "Must be returned the value of the key requested"
         raise NotImplementedError
 
 
@@ -139,7 +160,7 @@ class DescriptiveRepositoryAdapter(object):
         
         glucose = self._r.add_glucose_level(
                 user_pk=glucose.user_pk,
-                utc_timestamp=glucose.utc_timestamp,
+                timestamp=glucose.timestamp,
                 mgdl_level=glucose.mgdl_level
             )
 
@@ -153,7 +174,7 @@ class DescriptiveRepositoryAdapter(object):
             "Invalid instance of Activity provided"
         activity = self._r.add_activity(
                 user_pk=activity.user_pk,
-                utc_timestamp=activity.utc_timestamp,
+                timestamp=activity.timestamp,
                 intensity=activity.intensity,
                 minutes=activity.minutes
             )
@@ -169,7 +190,7 @@ class DescriptiveRepositoryAdapter(object):
 
         feeding = self._r.add_feeding(
                 user_pk=feeding.user_pk,
-                utc_timestamp=feeding.utc_timestamp,
+                timestamp=feeding.timestamp,
                 total_gr=feeding.total_gr,
                 total_ml=feeding.total_ml,
                 carb_gr=feeding.carb_gr,
@@ -189,7 +210,7 @@ class DescriptiveRepositoryAdapter(object):
 
         insulin = self._r.add_insulin_administration(
                 user_pk=insulin.user_pk,
-                utc_timestamp=insulin.utc_timestamp,
+                timestamp=insulin.timestamp,
                 insulin_type=insulin.insulin_type,
                 insulin_units=insulin.insulin_units
             )
@@ -205,7 +226,7 @@ class DescriptiveRepositoryAdapter(object):
             
         trait = self._r.update_trait(
                 user_pk=trait.user_pk,
-                utc_timestamp=trait.utc_timestamp,
+                timestamp=trait.timestamp,
                 kind=trait.kind,
                 value=trait.value
             )
@@ -215,81 +236,101 @@ class DescriptiveRepositoryAdapter(object):
 
         return trait
 
+    def update_configuration(self, config):
+        assert isinstance(config, Configuration),\
+            "Invalid instance of Configuration provided"
+            
+        config = self._r.update_configuration(user_pk=config.user_pk, key=config.key, value=config.value)
+        
+        return config
+
 
     """
     All the 'query' like methods
     """
-    def get_glucoses(self, user_pk, from_utc_timestamp=None,
-        until_utc_timestamp=None, mgdl_level_above=None, mgdl_level_below=None,
-        limit=None, order_by_utc_timestamp=True, order_ascending=False):
+    def get_glucoses(self, user_pk, from_timestamp=None,
+        until_timestamp=None, mgdl_level_above=None, mgdl_level_below=None,
+        limit=None, order_by_timestamp=True, order_ascending=False):
 
         return self._r.get_glucoses(
             user_pk,
-            from_utc_timestamp=from_utc_timestamp,
-            until_utc_timestamp=until_utc_timestamp,
+            from_timestamp=from_timestamp,
+            until_timestamp=until_timestamp,
             mgdl_level_above=mgdl_level_above,
             mgdl_level_below=mgdl_level_below,
             limit=limit,
-            order_by_utc_timestamp=order_by_utc_timestamp,
+            order_by_timestamp=order_by_timestamp,
             order_ascending=order_ascending
         )
 
 
-    def get_activities(self, user_pk, from_utc_timestamp=None,
-        until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True,
+    def get_activities(self, user_pk, from_timestamp=None,
+        until_timestamp=None, limit=None, order_by_timestamp=True,
         order_ascending=False):
 
         return self._r.get_activities(
             user_pk,
-            from_utc_timestamp=from_utc_timestamp,
-            until_utc_timestamp=until_utc_timestamp,
+            from_timestamp=from_timestamp,
+            until_timestamp=until_timestamp,
             limit=limit,
-            order_by_utc_timestamp=order_by_utc_timestamp,
+            order_by_timestamp=order_by_timestamp,
             order_ascending=order_ascending
         )
 
 
-    def get_traits(self, user_pk, kind, from_utc_timestamp=None,
-        until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True,
+    def get_traits(self, user_pk, kind, from_timestamp=None,
+        until_timestamp=None, limit=None, order_by_timestamp=True,
         order_ascending=False):
 
         return self._r.get_traits(
             user_pk,
             kind=kind,
-            from_utc_timestamp=from_utc_timestamp,
-            until_utc_timestamp=until_utc_timestamp,
+            from_timestamp=from_timestamp,
+            until_timestamp=until_timestamp,
             limit=limit,
-            order_by_utc_timestamp=order_by_utc_timestamp,
+            order_by_timestamp=order_by_timestamp,
             order_ascending=order_ascending
         )
+
+    def get_configuration(self, user_pk, key):
+        """
+        This must return a dia.model.Configuration class.
+        If the key don't exist, must create one using as value the
+        default value for the key requested from dia.models.ConfigurationKey.DefaultValues dict.
+        """
+        return self._r.get_configuration(user_pk, key=key)
         
 
-    def get_feedings(self, user_pk, from_utc_timestamp=None,
-        until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True,
+    def get_feedings(self, user_pk, from_timestamp=None,
+        until_timestamp=None, limit=None, order_by_timestamp=True,
         order_ascending=False):
 
         return self._r.get_feedings(
             user_pk,
-            from_utc_timestamp=from_utc_timestamp,
-            until_utc_timestamp=until_utc_timestamp,
+            from_timestamp=from_timestamp,
+            until_timestamp=until_timestamp,
             limit=limit,
-            order_by_utc_timestamp=order_by_utc_timestamp,
+            order_by_timestamp=order_by_timestamp,
             order_ascending=order_ascending
         )
 
 
-    def get_insulin_administrations(self, user_pk, from_utc_timestamp=None,
-        until_utc_timestamp=None, limit=None, order_by_utc_timestamp=True,
-        order_ascending=False):
+    def get_insulin_administrations(self, user_pk, from_timestamp=None,
+        until_timestamp=None, limit=None, order_by_timestamp=True,
+        order_ascending=False, insulin_types_in=[]):
 
         return self._r.get_insulin_administrations(
             user_pk,
-            from_utc_timestamp=from_utc_timestamp,
-            until_utc_timestamp=until_utc_timestamp,
+            from_timestamp=from_timestamp,
+            until_timestamp=until_timestamp,
             limit=limit,
-            order_by_utc_timestamp=order_by_utc_timestamp,
-            order_ascending=order_ascending
+            order_by_timestamp=order_by_timestamp,
+            order_ascending=order_ascending,
+            insulin_types_in=insulin_types_in
         )
+    
+    def get_user(self, user_pk):
+        return self._r.get_user(user_pk=user_pk)
 
 
     """
@@ -368,9 +409,9 @@ class PredictiveRequestContext(object):
     
     Is used to detail the context in which a recommendation request is made.
     """
-    def __init__(self, user_pk, utc_timestamp, tzinfo=pytz.utc):
+    def __init__(self, user_pk, timestamp, tzinfo=pytz.utc):
         self._u = user_pk
-        self._ts = utc_timestamp
+        self._ts = timestamp
         self._tz = tzinfo
 
     @property
@@ -378,7 +419,7 @@ class PredictiveRequestContext(object):
         return self._u
     
     @property
-    def utc_timestamp(self):
+    def timestamp(self):
         return self._ts
     
     @property
@@ -396,7 +437,7 @@ class PredictiveRequestContext(object):
     def __iter__(self):
         " With this, only with a dict(obj) the object is automatically converted as a dict. "
         yield 'user_pk', self.user_pk
-        yield 'utc_timestamp', self.utc_timestamp
+        yield 'timestamp', self.timestamp
         yield 'tzinfo', str(self.tzinfo)
     
     def __str__(self):

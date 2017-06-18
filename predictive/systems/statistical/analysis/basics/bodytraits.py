@@ -123,7 +123,7 @@ blood_liters ............... {} L
         
         activities = diacore.get_activities(
             user_pk=self.user_pk,
-            from_utc_timestamp=(self.current_datetime - Timedelta(days=30)).utc_timestamp
+            from_utc_timestamp=(self.current_datetime - Timedelta(days=30)).timestamp
         )
 
         last_day = 0
@@ -131,7 +131,7 @@ blood_liters ............... {} L
         footprints = []
     
         for activity in activities:
-            activity_datetime = Datetime.utcfromtimestamp(activity.utc_timestamp)
+            activity_datetime = Datetime.utcfromtimestamp(activity.timestamp)
             if last_day != 0 and activity_datetime.day != last_day:
                 last_day = activity_datetime.day
                 footprints.append((max_intensity/4.)*10.)

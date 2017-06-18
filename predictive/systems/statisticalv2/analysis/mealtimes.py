@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
-"""
-Calculará horas medias de comidas y aperitivos por usuario
-Calculará carbohidratos medios de ingesta por usuario
-"""
-from predictive.systems.statistical.analysis.tools.property import propertycached
-from predictive.systems.statistical.tools.dates import Time, Timedelta,\
-    Datetime
 
 from dia.models import InsulinType
-from dia.core import diacore
 
+from predictive.systems.statisticalv2.tools.dates import Time, Datetime,\
+    Timedelta
+
+import pytz
+from _threading_local import local
 
 """
 A helper class that calculates mean times of main meals.
@@ -22,7 +19,9 @@ si alguien utiliza insulina humana, que ha de esperar para comer,
 la hora media de comida será la de la comida real, no la de la administración
 de insulina.
 """
-class DayTimes(object):
+
+
+class MealTimes(object):
     """"""
     BREAKFAST = 0
     MID_MORNING_SNACK = 1
@@ -56,25 +55,31 @@ class DayTimes(object):
 
     def __init__(self, context):
         self._c = context
+        self._recalculate()
     
     @property
     def user_pk(self):
         return self._c.user_pk
 
     @property
-    def current_datetime(self):
-        return self._c.current_datetime
+    def context(self):
+        return self._c
 
-    @propertycached
-    def mean_feeding_hours(self):
+    def _recalculate(self):
+        self.breakfast = None
+        self.lunch = None
+        self.dinner = None
+
+        from dia.core import diacore
+
         # Hacemos una primera aproximación con las insulinas rápidas o cortas
         # administradas. Allí estarán las comidas
-        insulins = diacore.get_insulin_administrations(
-            user_pk=self.user_pk,
+        targets = diacore.get_insulin_administrations(
+            self.user_pk,
             limit=30,
-            order_by_utc_timestamp=True)
-        
-        targets = [insulin for insulin in insulins if insulin.insulin_type in [InsulinType.RAPID, InsulinType.SHORT]]
+            until_timestamp=self._c.timestamp,
+            insulin_types_in=[InsulinType.RAPID, InsulinType.SHORT]
+        )
         
         DAY_HOURS = 24
         DAY_MINUTES = DAY_HOURS * 60
@@ -91,12 +96,18 @@ class DayTimes(object):
             i = 0.
             total = 0.
             for target in targets:
-                minutes = Time.time2minutes(Datetime.utcfromtimestamp(target.timestamp))
+
+                utc_dt = Datetime.fromtimestamp(target.timestamp, pytz.utc)
+                local_dt = utc_dt.astimezone(self.context.tzinfo)
+                minutes = Time.time2minutes(local_dt)
+
                 if minutes < 180:
                     minutes += DAY_MINUTES
+
                 if minutes >= minute and minutes <= minute + WIDE_MINUTES:
                     i += 1
                     total += minutes
+
             mean = 0
             if i > 0:
                 mean = total / i
@@ -122,18 +133,9 @@ class DayTimes(object):
         result[2] <== cena
         """
         if len(result) == 3:
-            breakfast = Time.minutes2time(result[0])
-            lunch = Time.minutes2time(result[1])
-            dinner = Time.minutes2time(result[2])
-            
-            times = type('MeanFeedingHours', (), {})()
-            times.breakfast = breakfast
-            times.lunch = lunch
-            times.dinner = dinner
-            
-            return times
-
-        return None
+            self.breakfast = Time.minutes2time(result[0])
+            self.lunch = Time.minutes2time(result[1])
+            self.dinner = Time.minutes2time(result[2])
 
     def __str__(self):
         st = """DayTimes:
@@ -141,29 +143,29 @@ breakfast: ... {}
 lunch: ....... {}
 dinner: ...... {}
 """.format(
-            self.mean_feeding_hours.breakfast,
-            self.mean_feeding_hours.lunch,
-            self.mean_feeding_hours.dinner,
+            self.breakfast,
+            self.lunch,
+            self.dinner,
         )
         return st
 
     def not_ready(self):
-        return self.mean_feeding_hours == None
+        return self.breakfast == None or self.lunch == None or self.dinner == None
 
     def is_ready(self):
-        return self.mean_feeding_hours != None
+        return self.breakfast != None and self.lunch != None and self.dinner != None
     
     def nearest_meal(self, meal_datetime):
-        if not self.mean_feeding_hours:
+        if self.not_ready():
             return None
         
         base_date = meal_datetime.date()
         if meal_datetime.hour < 3:
             base_date = base_date - Timedelta(days=1)
         
-        br = Datetime.combine(base_date, self.mean_feeding_hours.breakfast)
-        lu = Datetime.combine(base_date, self.mean_feeding_hours.lunch)
-        di = Datetime.combine(base_date, self.mean_feeding_hours.dinner)
+        br = Datetime.combine(base_date, self.breakfast)
+        lu = Datetime.combine(base_date, self.lunch)
+        di = Datetime.combine(base_date, self.dinner)
         
         result = {
             br: self.BREAKFAST,
@@ -171,21 +173,21 @@ dinner: ...... {}
             di: self.DINNER
         }
 
-        nearest = Datetime.nearest_datetime(meal_datetime, [br, lu, di])
+        nearest = Datetime.nearest_datetime_static(meal_datetime, [br, lu, di])
         return result[nearest]
         
 
     def nearest_snack(self, snack_datetime):
-        if not self.mean_feeding_hours:
+        if self.not_ready():
             return None
 
         base_date = snack_datetime.date()
         if snack_datetime.hour < 3:
             base_date = base_date - Timedelta(days=1)
         
-        mm = Datetime.combine(base_date, self.mean_feeding_hours.breakfast) + Timedelta(minutes=180)
-        af = Datetime.combine(base_date, self.mean_feeding_hours.lunch) + Timedelta(minutes=180)
-        bb = Datetime.combine(base_date, self.mean_feeding_hours.dinner) + Timedelta(minutes=180)
+        mm = Datetime.combine(base_date, self.breakfast) + Timedelta(minutes=180)
+        af = Datetime.combine(base_date, self.lunch) + Timedelta(minutes=180)
+        bb = Datetime.combine(base_date, self.dinner) + Timedelta(minutes=180)
         
         result = {
             mm: self.MID_MORNING_SNACK,
@@ -215,8 +217,8 @@ dinner: ...... {}
     def is_snack(self, dt):
         return self.nearest_day_time(dt) in self.SNACK_DAY_TIMES
 
-    def nearest_day_time(self, base_date):
-        if not self.mean_feeding_hours:
+    def nearest_meal_or_snack_time(self, base_date):
+        if self.not_ready():
             return None
 
         if base_date.hour < 3:
@@ -224,12 +226,12 @@ dinner: ...... {}
         
         base_date = base_date.date()
         
-        br = Datetime.combine(base_date, self.mean_feeding_hours.breakfast)
-        lu = Datetime.combine(base_date, self.mean_feeding_hours.lunch)
-        di = Datetime.combine(base_date, self.mean_feeding_hours.dinner)
-        mm = Datetime.combine(base_date, self.mean_feeding_hours.breakfast) + Timedelta(minutes=180)
-        af = Datetime.combine(base_date, self.mean_feeding_hours.lunch) + Timedelta(minutes=180)
-        bb = Datetime.combine(base_date, self.mean_feeding_hours.dinner) + Timedelta(minutes=180)
+        br = Datetime.combine(base_date, self.breakfast)
+        lu = Datetime.combine(base_date, self.lunch)
+        di = Datetime.combine(base_date, self.dinner)
+        mm = Datetime.combine(base_date, self.breakfast) + Timedelta(minutes=180)
+        af = Datetime.combine(base_date, self.lunch) + Timedelta(minutes=180)
+        bb = Datetime.combine(base_date, self.dinner) + Timedelta(minutes=180)
         
         result = {
             br: self.BREAKFAST,

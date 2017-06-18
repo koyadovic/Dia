@@ -14,16 +14,47 @@ class DescriptiveModel:
 
 
 """"""
+class User(DescriptiveModel):
+    pk = None
+    def __init__(self, pk):
+        self.pk = pk
+    def __iter__(self):
+        yield 'pk', self.pk
+    def __str__(self):
+        return '{}: {}'.format(type(self).__name__, dict(self))
+    def __repr__(self):
+        return self.__str__()
+
+""""""
+class Configuration(DescriptiveModel):
+    user_pk = None
+    key     = None
+    value   = None
+    def __init__(self, user_pk=None, key=None, value=None):
+        self.user_pk = user_pk
+        self.key = key
+        self.value = value
+    def __iter__(self):
+        yield 'user_pk', self.user_pk
+        yield 'key', self.key
+        yield 'value', self.value
+    def __str__(self):
+        return '{}: {}'.format(type(self).__name__, dict(self))
+    def __repr__(self):
+        return self.__str__()
+
+
+""""""
 class Trait(DescriptiveModel):
     pk            = None
     user_pk       = None
-    utc_timestamp = None
+    timestamp     = None
     kind          = None
     value         = None
-    def __init__(self, pk=None, user_pk=None, utc_timestamp=None, kind=None, value=None):
+    def __init__(self, pk=None, user_pk=None, timestamp=None, kind=None, value=None):
         self.pk            = pk
         self.user_pk       = user_pk
-        self.utc_timestamp = utc_timestamp
+        self.timestamp     = timestamp
         self.kind          = kind
         self.value         = value
     def __iter__(self):
@@ -34,49 +65,53 @@ class Trait(DescriptiveModel):
         """
         yield 'pk', self.pk
         yield 'user_pk', self.user_pk
-        yield 'utc_timestamp', self.utc_timestamp
+        yield 'timestamp', self.timestamp
         yield 'kind', self.kind
         yield 'value', self.value
     def __str__(self):
         return '{}: {}'.format(type(self).__name__, dict(self))
+    def __repr__(self):
+        return self.__str__()
     
 
 """"""
 class GlucoseLevel(DescriptiveModel):
-    pk            = None
-    user_pk       = None
-    utc_timestamp = None
-    mgdl_level    = None
+    pk         = None
+    user_pk    = None
+    timestamp  = None
+    mgdl_level = None
     
-    def __init__(self, pk=None, user_pk=None, utc_timestamp=None, mgdl_level=None):
-        self.pk            = pk
-        self.user_pk       = user_pk
-        self.utc_timestamp = utc_timestamp
-        self.mgdl_level    = mgdl_level
+    def __init__(self, pk=None, user_pk=None, timestamp=None, mgdl_level=None):
+        self.pk         = pk
+        self.user_pk    = user_pk
+        self.timestamp  = timestamp
+        self.mgdl_level = mgdl_level
     
     def __iter__(self):
         " With this, only with a dict(obj) the object is automatically converted as a dict. "
         yield 'pk', self.pk
         yield 'user_pk', self.user_pk
-        yield 'utc_timestamp', self.utc_timestamp
+        yield 'timestamp', self.timestamp
         yield 'mgdl_level', self.mgdl_level
     
     def __str__(self):
         return '{}: {}'.format(type(self).__name__, dict(self))
+    def __repr__(self):
+        return self.__str__()
 
 
 """"""
 class Activity(DescriptiveModel):
     pk            = None
     user_pk       = None
-    utc_timestamp = None
+    timestamp     = None
     intensity     = None
     minutes       = None
     
-    def __init__(self, pk=None, user_pk=None, utc_timestamp=None, intensity=None, minutes=None):
+    def __init__(self, pk=None, user_pk=None, timestamp=None, intensity=None, minutes=None):
         self.pk            = pk
         self.user_pk       = user_pk
-        self.utc_timestamp = utc_timestamp
+        self.timestamp     = timestamp
         self.intensity     = intensity
         self.minutes       = minutes
     
@@ -84,26 +119,28 @@ class Activity(DescriptiveModel):
         " With this, only with a dict(obj) the object is automatically converted as a dict. "
         yield 'pk', self.pk
         yield 'user_pk', self.user_pk
-        yield 'utc_timestamp', self.utc_timestamp
+        yield 'timestamp', self.timestamp
         yield 'intensity', self.intensity
         yield 'minutes', self.minutes
     
     def __str__(self):
         return '{}: {}'.format(type(self).__name__, dict(self))
+    def __repr__(self):
+        return self.__str__()
 
 
 """"""
 class InsulinAdministration(DescriptiveModel):
     pk            = None
     user_pk       = None
-    utc_timestamp = None
+    timestamp     = None
     insulin_type  = None
     insulin_units = None
     
-    def __init__(self, pk=None, user_pk=None, utc_timestamp=None, insulin_type=None, insulin_units=None):
+    def __init__(self, pk=None, user_pk=None, timestamp=None, insulin_type=None, insulin_units=None):
         self.pk            = pk
         self.user_pk       = user_pk
-        self.utc_timestamp = utc_timestamp
+        self.timestamp     = timestamp
         self.insulin_type  = insulin_type
         self.insulin_units = insulin_units
     
@@ -111,19 +148,21 @@ class InsulinAdministration(DescriptiveModel):
         " With this, only with a dict(obj) the object is automatically converted as a dict. "
         yield 'pk', self.pk
         yield 'user_pk', self.user_pk
-        yield 'utc_timestamp', self.utc_timestamp
+        yield 'timestamp', self.timestamp
         yield 'insulin_type', self.insulin_type
         yield 'insulin_units', self.insulin_units
     
     def __str__(self):
         return '{}: {}'.format(type(self).__name__, dict(self))
+    def __repr__(self):
+        return self.__str__()
 
 
 """"""
 class Feeding(DescriptiveModel):
     pk            = None
     user_pk       = None
-    utc_timestamp = None
+    timestamp     = None
     total_gr      = None
     total_ml      = None
     carb_gr       = None
@@ -132,10 +171,10 @@ class Feeding(DescriptiveModel):
     fiber_gr      = None
     alcohol_gr    = None
     
-    def __init__(self, pk=None, user_pk=None, utc_timestamp=None, total_gr=0, total_ml=0, carb_gr=0, protein_gr=0, fat_gr=0, fiber_gr=0, alcohol_gr=0):
+    def __init__(self, pk=None, user_pk=None, timestamp=None, total_gr=0, total_ml=0, carb_gr=0, protein_gr=0, fat_gr=0, fiber_gr=0, alcohol_gr=0):
         self.pk            = pk
         self.user_pk       = user_pk
-        self.utc_timestamp = utc_timestamp
+        self.timestamp     = timestamp
         self.total_gr      = total_gr
         self.total_ml      = total_ml
         self.carb_gr       = carb_gr
@@ -148,7 +187,7 @@ class Feeding(DescriptiveModel):
         " With this, only with a dict(obj) the object is automatically converted as a dict. "
         yield 'pk', self.pk
         yield 'user_pk', self.user_pk
-        yield 'utc_timestamp', self.utc_timestamp
+        yield 'timestamp', self.timestamp
         yield 'total_gr', self.total_gr
         yield 'total_ml', self.total_ml
         yield 'carb_gr', self.carb_gr
@@ -159,6 +198,8 @@ class Feeding(DescriptiveModel):
     
     def __str__(self):
         return '{}: {}'.format(type(self).__name__, dict(self))
+    def __repr__(self):
+        return self.__str__()
 
 
 
@@ -201,5 +242,18 @@ class InsulinType:
     ULTRA_SLOW   = 4
 
     __metaclass__ = ABCMeta
+    
+
+class ConfigurationKey:
+    TIMEZONE     = 0 # value one of pytz.all_timezones as string
+
+    DefaultValues = {
+        TIMEZONE: 'UTC'
+    }
+    
+    __metaclass__ = ABCMeta
+
+        
+
     
 
