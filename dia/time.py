@@ -16,24 +16,24 @@ datetime.datetime(2017, 6, 18, 7, 6, 46, 722048)
 aware_local_dt:
 datetime.datetime(2017, 6, 18, 7, 6, 46, 722048, tzinfo=<DstTzInfo 'Europe/Madrid' CEST+2:00:00 DST>)
 """
-class Timestamp(object):
-    def __init__(self, arg):
-        if isinstance(arg, long) or isinstance(arg, int):
-            self._timestamp = arg
+class Instant(object):
+    def __init__(self, timestamp=None, dtime=None, timezone=None):
+        if timestamp:
+            self._timestamp = timestamp
             self._tz = pytz.utc
-        elif isinstance(arg, datetime):
-            self._timestamp = calendar.timegm(arg.astimezone(pytz.utc).utctimetuple())
-            if arg.tzinfo:
-                self._tz = arg.tzinfo
+        elif dtime:
+            self._timestamp = calendar.timegm(dtime.astimezone(pytz.utc).utctimetuple())
+            if dtime.tzinfo:
+                self._tz = dtime.tzinfo
             else:
                 self._tz = pytz.utc
-        elif arg == None:
-            self._tz = pytz.utc
-            self._timestamp = 0
         else:
-            raise ValueError("arg is an instance of invalid type")
+            self._tz = pytz.utc
+            self._timestamp = calendar.timegm(pytz.utc.localize(datetime.utcnow()).utctimetuple())
+        if timezone:
+            self.tz = timezone
     def __str__(self):
-        return "Timestamp: {}, timezone: {}, datetime: {}".format(self.ts, self.tz, self.dt)
+        return __name__ + ": timestamp: {}, timezone: {}, datetime: {}".format(self.ts, self.tz, self.dt)
     @property
     def ts(self):
         return self._timestamp
@@ -41,10 +41,10 @@ class Timestamp(object):
     def dt(self):
         return datetime.utcfromtimestamp(self.ts).\
             replace(tzinfo=pytz.utc).\
-            astimezone(self.tz)
+            astimezone(pytz.timezone(self.tz))
     @property
     def tz(self):
-        return self._tz
+        return str(self._tz)
     @tz.setter
     def tz(self, new_tz):
         assert isinstance(new_tz, str) or isinstance(new_tz, unicode)

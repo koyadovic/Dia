@@ -10,7 +10,6 @@ from dia.models import GlucoseLevel, Activity, Feeding, InsulinAdministration,\
     Trait, Configuration, User, ConfigurationKey
     
 from dia.interfaces import AbstractDescriptiveRepository
-from dia.time import Timestamp
 
 import sqlalchemy
 import os

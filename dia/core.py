@@ -6,7 +6,7 @@ from dia.interfaces import DescriptiveRepositoryAdapter, AbstractPredictiveSyste
 from . import settings
 from dia.models import GlucoseLevel, Activity, Feeding, InsulinAdministration,\
     Trait, Configuration, ConfigurationKey
-from dia.time import Timestamp
+from dia.time import Instant
 
 
 """
@@ -104,46 +104,37 @@ class DiaUserHandler(object):
     def __init__(self, user_pk=None, timestamp=None):
         self.diacore = diacore
         self.user = self.diacore.get_user(user_pk)
-        self.timestamp = timestamp
+        self.instant = Instant(timestamp)
         self.timezone = self.diacore.get_configuration(self.user.pk, ConfigurationKey.TIMEZONE).value
+        self.instant.tz = self.timezone
 
-    def _asign_ts_obj(self, timestamp):
-        assert timestamp or self.timestamp
-        """
-        We work with dia.time.Timestamp objects internally.
-        This object has all the timezone information and conversion methods
-        to help working between timestamps and aware datetimes.
-        """
+    def _assign_instant(self, timestamp=None):
         if timestamp:
-            ts = timestamp
-        if self.timestamp:
-            ts = self.timestamp
-        timestamp_obj = Timestamp(ts)
-        timestamp_obj.change_tz(self.timezone)
-        return timestamp_obj
+            return Instant(timestamp=timestamp, timezone=self.timezone)
+        return self.instant
         
         
     def add_glucose(self, timestamp=None, mgdl_level=None):
         glucose = GlucoseLevel(
             user_pk=self.user.pk,
-            timestamp=self._asign_ts(timestamp).ts,
+            timestamp=self._assign_instant(timestamp).ts,
             mgdl_level=mgdl_level
         )
-        self.diacore.add_glucose_level(glucose)
+        return self.diacore.add_glucose_level(glucose)
 
     def add_activity(self, timestamp=None, intensity=None, minutes=None):
         activity = Activity(
             user_pk=self.user.pk,
-            timestamp=self._asign_ts(timestamp).ts,
+            timestamp=self._assign_instant(timestamp).ts,
             intensity=intensity,
             minutes=minutes
         )
-        self.diacore.add_activity(activity)
+        return self.diacore.add_activity(activity)
         
     def add_feeding(self, timestamp=None, total_gr=0, total_ml=0, carb_gr=0, protein_gr=0, fat_gr=0, fiber_gr=0, alcohol_gr=0):
         feeding = Feeding(
             user_pk=self.user.pk,
-            timestamp=self._asign_ts(timestamp).ts,
+            timestamp=self._assign_instant(timestamp).ts,
             total_gr=total_gr,
             total_ml=total_ml,
             carb_gr=carb_gr,
@@ -152,28 +143,28 @@ class DiaUserHandler(object):
             fiber_gr=fiber_gr,
             alcohol_gr=alcohol_gr
         )
-        self.diacore.add_feeding(feeding)
+        return self.diacore.add_feeding(feeding)
 
     def add_insulin_administration(self, timestamp=None, insulin_type=None, insulin_units=None):
         insulin = InsulinAdministration(
             user_pk=self.user.pk,
-            timestamp=self._asign_ts(timestamp).ts,
+            timestamp=self._assign_instant(timestamp).ts,
             insulin_type=insulin_type,
             insulin_units=insulin_units
         )
-        self.diacore.add_insulin_administration(insulin)
+        return self.diacore.add_insulin_administration(insulin)
     
     def update_trait(self, timestamp=None, kind=None, value=None):
         trait = Trait(
             user_pk=self.user.pk,
-            timestamp=self._asign_ts(timestamp).ts,
+            timestamp=self._assign_instant(timestamp).ts,
             kind=kind,
             value=value
         )
-        self.diacore.update_trait(trait)
+        return self.diacore.update_trait(trait)
     
     def update_configuration(self, key=None, value=None):
         config = Configuration(
             user_pk=self.user.pk, key=key, value=value
         )
-        self.diacore.update_configuration(config)
+        return self.diacore.update_configuration(config)
